@@ -38,7 +38,7 @@
 > Si los nombres difieren un poco (Supabase cambia la pantalla de tanto en tanto), mandame una captura y te indico dónde tocar.
 
 ## Qué es seguro compartir
-- La **anon/publishable key** es pública por diseño (va dentro de la página). Qué puede hacer lo controla el `schema.sql`: las tablas están bloqueadas y solo se accede con las funciones que verifican la clave del espacio (SanLuis, SanLuisEdit, …). Una clave de solo lectura **no puede escribir**, aunque alguien intente saltarse la página.
+- La **anon/publishable key** es pública por diseño (va dentro de la página). Qué puede hacer lo controla el `schema.sql`: las tablas están bloqueadas y solo se accede con las funciones que verifican la clave del espacio (solo lectura / edición de cada espacio). Una clave de solo lectura **no puede escribir**, aunque alguien intente saltarse la página.
 - La **service_role key** y la **Database Password**: no las compartas nunca.
 
 ## Límites del plan gratuito (importante)

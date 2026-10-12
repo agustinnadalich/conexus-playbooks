@@ -3,14 +3,7 @@
 Contenido: `index.html` (la app), `guia.html` (guía ES/IT), `data/` (planes publicados opcionales), `.nojekyll`.
 
 ## Claves
-| Clave | Espacio | Permiso |
-|---|---|---|
-| `SanLuis` | San Luis | solo lectura (jugadores) |
-| `SanLuisEdit` | San Luis | edición (entrenadores) |
-| `PescaraRugby` | Pescara Rugby | solo lectura |
-| `PescaraRugbyEdit` | Pescara Rugby | edición |
-
-(No distingue mayúsculas ni espacios.) Mientras no haya base de datos, es un filtro del navegador: **no es seguridad real**. Con Supabase (ver `GUIA-SUPABASE.md`) la restricción pasa a ser real en el servidor.
+Cada espacio (San Luis, Pescara) tiene una clave de **solo lectura** y otra de **edición**. Se guardan como hash SHA-256 en `src/gate.js`/`supabase/schema.sql`; el texto de las claves NO está en el repositorio (ver tu archivo privado `private/CLAVES.md`).
 
 ## Publicar gratis en GitHub Pages (recomendado)
 1. Creá cuenta en github.com → **New repository** → nombre `conexus-play` → **Public** → Create.
