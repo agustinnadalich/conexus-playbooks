@@ -69,12 +69,12 @@ function finishMerge(d,ver){ applyRemote(d,ver); base=J(JSON.parse(J(pendingRemo
 function resolve(r){
   let res; try{res=mergePlans(JSON.parse(base),JSON.parse(J(data)),r.data)}catch(e){return conflictBasic(r)}
   base=J(r.data);
-  if(!res.conflicts.length){ applyRemote(res.data,r.version); base=J(r.data); dirty=true; pendingRemote=null; toast(T('Se combinaron tus cambios con los de '+(r.updated_by||'otra persona')+'.','Le tue modifiche sono state unite a quelle di '+(r.updated_by||'un\'altra persona')+'.')); push(); return }
+  if(!res.conflicts.length){ applyRemote(res.data,r.version); base=J(r.data); dirty=true; pendingRemote=null; toast(T('Se combinaron tus cambios con los de '+(r.updated_by||'otra persona')+'.','Le tue modifiche sono state unite a quelle di '+(r.updated_by||'un\'altra persona')+'.')); setTimeout(push,300); return }
   setStatus('conf'); document.querySelectorAll('.cxconf').forEach(n=>n.remove());
   const names=res.conflicts.map(c=>((c.theirs||c.mine||{}).title||c.id));
   const ov=document.createElement('div'); ov.className='modal cxconf'; const bx=document.createElement('div'); bx.className='box';
   bx.innerHTML='<h3 style="margin-top:0">⚠ '+T('Tocaron la misma escena que vos','Hanno modificato la tua stessa scena')+'</h3><p>'+T('<b>'+(r.updated_by||'Alguien')+'</b> y vos cambiaron estas escenas a la vez:','<b>'+(r.updated_by||'Qualcuno')+'</b> e tu avete modificato queste scene contemporaneamente:')+'</p><ul>'+names.map(n=>'<li>'+n.replace(/</g,'&lt;')+'</li>').join('')+'</ul><p class="hint">'+T('Lo demás de ambos ya se combinó. Elegí con cuál versión te quedás en estas escenas (la otra queda en el historial).','Il resto di entrambi è già stato unito. Scegli quale versione tenere per queste scene (l\'altra resta nello storico).')+'</p><div class="row2" style="flex-direction:column;align-items:stretch;gap:8px"><button class="a">'+T('Me quedo con la mía','Tengo la mia')+'</button><button class="b">'+T('Me quedo con la suya','Tengo la sua')+'</button></div>';
-  const done=mine=>{ ov.remove(); res.conflicts.forEach(c=>{ const i=res.data.steps.findIndex(x=>x.id===c.id); if(mine){ if(c.mine){ if(i>=0) res.data.steps[i]=c.mine; else res.data.steps.push(c.mine) } else if(i>=0) res.data.steps.splice(i,1) } }); applyRemote(res.data,r.version); base=J(r.data); dirty=true; pendingRemote=null; push() };
+  const done=mine=>{ ov.remove(); res.conflicts.forEach(c=>{ const i=res.data.steps.findIndex(x=>x.id===c.id); if(mine){ if(c.mine){ if(i>=0) res.data.steps[i]=c.mine; else res.data.steps.push(c.mine) } else if(i>=0) res.data.steps.splice(i,1) } }); applyRemote(res.data,r.version); base=J(r.data); dirty=true; pendingRemote=null; setTimeout(push,300) };
   bx.querySelector('.a').onclick=()=>done(true); bx.querySelector('.b').onclick=()=>done(false);
   ov.appendChild(bx); document.body.appendChild(ov);
 }
