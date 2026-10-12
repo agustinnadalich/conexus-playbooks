@@ -3,7 +3,7 @@
 
 create table if not exists public.access (
   hash text primary key,            -- SHA-256 de 'conexus-play|<clave>'
-  ws   text not null check (ws in ('sanluis','pescara')),
+  ws   text not null check (ws in ('sanluis','pescara','tucuman')),
   role text not null check (role in ('viewer','editor'))
 );
 create table if not exists public.plans (
@@ -36,8 +36,10 @@ insert into public.access (hash, ws, role) values
   ('b76052c5d9c3498d37ba7d8c528a26808e77b2597c287815955f266511d5874b','sanluis','editor'),
   ('bfebcdac08cef423b21f758882fb1b67f7bc4ad829dbe8b3ae135cf30a2d4b54','pescara','viewer'),
   ('593d219f5519bf6761c066968848a49650680a02d4cc1cf3e9116c9611e9f09a','pescara','editor')
+  ,('8af18789b2916d58022f6f228e0bd7424da4259a0c0861b7ef3d899bd3774598','tucuman','viewer'),
+  ('b069569841150995f8048d5a8bfe055d03d8495afc1a950b8ed1ce871d0e52a6','tucuman','editor')
 on conflict (hash) do nothing;
-insert into public.plans (ws) values ('sanluis'),('pescara') on conflict (ws) do nothing;
+insert into public.plans (ws) values ('sanluis'),('pescara'),('tucuman') on conflict (ws) do nothing;
 
 -- Leer el plan (viewer o editor)
 create or replace function public.cx_get(p_hash text) returns jsonb

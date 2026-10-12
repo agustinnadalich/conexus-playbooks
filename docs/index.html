@@ -3164,14 +3164,17 @@ window.addEventListener('resize',()=>{if(view==='map'&&!mapFitted) fitMap()});
   /* ---------- espacios (la clave se compara como hash; para cambiarlas ver README) ---------- */
   var WORKSPACES={
     sanluis:{id:'sanluis',name:'San Luis'},
-    pescara:{id:'pescara',name:'Pescara Rugby'}
+    pescara:{id:'pescara',name:'Pescara Rugby'},
+    tucuman:{id:'tucuman',name:'Tucumán Rugby'}
   };
   /* clave (hash) → espacio + rol. viewer = solo ver y presentar; editor = puede modificar */
   var ACCESS=[
     {ws:'sanluis',role:'viewer',hash:'6a7dfe9fb6ed06d7bfc4467cdeb6ebe36df5393449e1f8d51ab24bd669d8c686'},
     {ws:'sanluis',role:'editor',hash:'b76052c5d9c3498d37ba7d8c528a26808e77b2597c287815955f266511d5874b'},
     {ws:'pescara',role:'viewer',hash:'bfebcdac08cef423b21f758882fb1b67f7bc4ad829dbe8b3ae135cf30a2d4b54'},
-    {ws:'pescara',role:'editor',hash:'593d219f5519bf6761c066968848a49650680a02d4cc1cf3e9116c9611e9f09a'}
+    {ws:'pescara',role:'editor',hash:'593d219f5519bf6761c066968848a49650680a02d4cc1cf3e9116c9611e9f09a'},
+    {ws:'tucuman',role:'viewer',hash:'8af18789b2916d58022f6f228e0bd7424da4259a0c0861b7ef3d899bd3774598'},
+    {ws:'tucuman',role:'editor',hash:'b069569841150995f8048d5a8bfe055d03d8495afc1a950b8ed1ce871d0e52a6'}
   ];
   var SALT='conexus-play|';
   /* ---------- banderas (SVG, para que se vean igual en Windows) ---------- */

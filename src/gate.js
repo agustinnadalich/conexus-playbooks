@@ -4,14 +4,17 @@
   /* ---------- espacios (la clave se compara como hash; para cambiarlas ver README) ---------- */
   var WORKSPACES={
     sanluis:{id:'sanluis',name:'San Luis'},
-    pescara:{id:'pescara',name:'Pescara Rugby'}
+    pescara:{id:'pescara',name:'Pescara Rugby'},
+    tucuman:{id:'tucuman',name:'Tucumán Rugby'}
   };
   /* clave (hash) → espacio + rol. viewer = solo ver y presentar; editor = puede modificar */
   var ACCESS=[
     {ws:'sanluis',role:'viewer',hash:'@@H_SL_V@@'},
     {ws:'sanluis',role:'editor',hash:'@@H_SL_E@@'},
     {ws:'pescara',role:'viewer',hash:'@@H_PE_V@@'},
-    {ws:'pescara',role:'editor',hash:'@@H_PE_E@@'}
+    {ws:'pescara',role:'editor',hash:'@@H_PE_E@@'},
+    {ws:'tucuman',role:'viewer',hash:'@@H_TU_V@@'},
+    {ws:'tucuman',role:'editor',hash:'@@H_TU_E@@'}
   ];
   var SALT='conexus-play|';
   /* ---------- banderas (SVG, para que se vean igual en Windows) ---------- */

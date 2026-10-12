@@ -163,7 +163,7 @@ rep("lastSnap=JSON.stringify(data);\n$('#uUndo').onclick=undo;","document.queryS
 # ---- puerta de acceso + i18n ----
 gate=open(str(ROOT/'src'/'gate.js')).read()
 H=lambda k:hashlib.sha256(('conexus-play|'+k).encode()).hexdigest()
-gate=gate.replace('@@CFG@@',json.dumps(json.load(open(str(ROOT/'src'/'config.json'))))).replace('@@H_SL_V@@',H('sanluis')).replace('@@H_SL_E@@',H('sanluisedit')).replace('@@H_PE_V@@',H('pescararugby')).replace('@@H_PE_E@@',H('pescararugbyedit'))
+gate=gate.replace('@@CFG@@',json.dumps(json.load(open(str(ROOT/'src'/'config.json'))))).replace('@@H_SL_V@@',H('sanluis')).replace('@@H_SL_E@@',H('sanluisedit')).replace('@@H_PE_V@@',H('pescararugby')).replace('@@H_PE_E@@',H('pescararugbyedit')).replace('@@H_TU_V@@',H('tucumanrugby')).replace('@@H_TU_E@@',H('tucumanrugbyedit'))
 gate=gate.replace('@@IT_EXACT@@',json.dumps(exact,ensure_ascii=False)).replace('@@IT_RULES@@',json.dumps(rules,ensure_ascii=False))
 s=s.replace('@@GATE@@','<script>\n'+gate+'</script>')
 open(OUT,'w',encoding='utf8').write(s)
