@@ -2315,8 +2315,9 @@ $('#kPaste').onclick=()=>{
 };
 
 /* ---------- árbol: estructura, copiar y pegar ---------- */
-function newId(){let n=steps.length+1; while(idxOf('s'+n)>=0) n++; return 's'+n}
-function newIdAvoid(extra){let n=steps.length+1+extra.length; while(idxOf('s'+n)>=0||extra.includes('s'+n)) n++; return 's'+n}
+const rid3=()=>Math.random().toString(36).slice(2,5);
+function newId(){let n=steps.length+1, id; do{id='s'+n+rid3(); n++}while(idxOf(id)>=0); return id}
+function newIdAvoid(extra){let n=steps.length+1+extra.length, id; do{id='s'+n+rid3(); n++}while(idxOf(id)>=0||extra.includes(id)); return id}
 function toast(t){
   document.querySelectorAll('.toast').forEach(n=>n.remove());
   const d=document.createElement('div'); d.className='toast'; d.textContent=t; document.body.appendChild(d);
@@ -3032,7 +3033,7 @@ const rpc=async(fn,body)=>{const r=await fetch(C.url+'/rest/v1/rpc/'+fn,{method:
 let who=localStorage.getItem('cx.who')||'';
 if(editor&&!who){who=(prompt(T('¿Cómo te llamás? (así te ven los demás editores)','Come ti chiami? (così ti vedono gli altri editor)'))||'').trim()||('Editor '+(100+Math.floor(Math.random()*900))); try{localStorage.setItem('cx.who',who)}catch(e){}}
 if(!who) who='viewer';
-let rv=CX.rv||0, dirty=false, applying=false, pushing=false, timer=null, pendingRemote=null, down=false, others=[];
+let base=JSON.stringify(data), rv=CX.rv||0, dirty=false, applying=false, pushing=false, timer=null, pendingRemote=null, down=false, others=[];
 window.addEventListener('pointerdown',()=>{down=true},true); window.addEventListener('pointerup',()=>{down=false},true);
 /* ---- barra de estado ---- */
 const bar=document.createElement('div'); bar.id='syncBar'; document.body.appendChild(bar);
@@ -3049,7 +3050,7 @@ function applyRemote(d,v){
     data=normalize(JSON.parse(JSON.stringify(d))); steps=data.steps; migrateLegacy(); undoStack=[]; redoStack=[]; history=[];
     mapDir=data.mapDir==='v'?'v':'h'; if($('#kHoldAuto')) $('#kHoldAuto').checked=!!data.holdEnd;
     save(); mapFitted=false; const ix=idxOf(curId); goDirect(ix>=0?ix:Math.max(0,idxOf(data.starts[0].root))); setView(view);
-    rv=v; dirty=false; pendingRemote=null;
+    rv=v; dirty=false; pendingRemote=null; base=JSON.stringify(data);
   }finally{applying=false}
 }
 /* ---- guardar ---- */
@@ -3059,21 +3060,51 @@ async function push(force){
   if(!editor||pushing||!dirty) return; pushing=true; const snap=JSON.stringify(data);
   try{
     const r=await rpc('cx_save',{p_hash:CX.hash,p_who:who,p_base:rv,p_data:JSON.parse(snap)});
-    if(r.ok){rv=r.version; dirty=JSON.stringify(data)!==snap; pendingRemote=null; setStatus('ok'); if(dirty){clearTimeout(timer); timer=setTimeout(push,800)}}
-    else if(r.conflict){pendingRemote=r; conflict(r)}
+    if(r.ok){rv=r.version; base=snap; dirty=JSON.stringify(data)!==snap; pendingRemote=null; setStatus('ok'); if(dirty){clearTimeout(timer); timer=setTimeout(push,800)}}
+    else if(r.conflict){pendingRemote=r; resolve(r)}
     else setStatus('err',' ('+(r.error||'?')+')');
   }catch(e){setStatus('off'); clearTimeout(timer); timer=setTimeout(push,8000)}
   pushing=false;
 }
-function conflict(r){
+/* ---- combinar cambios (por escena) ---- */
+const J=x=>JSON.stringify(x);
+function mergeList(bl,ml,tl,onConf){
+  const idx=a=>{const o={}; (a||[]).forEach(x=>o[x.id]=x); return o}, B=idx(bl),M=idx(ml),seen=new Set(),out=[];
+  (tl||[]).forEach(t=>{seen.add(t.id); const b=B[t.id], m=M[t.id];
+    if(!b){ if(m&&J(m)!==J(t)) onConf(t.id,m,t); out.push(t); return }
+    const mc=!m||J(m)!==J(b), tc=J(t)!==J(b);
+    if(!m){ if(tc) onConf(t.id,null,t); else return; out.push(t); return }
+    if(mc&&!tc) out.push(m); else if(!mc||J(m)===J(t)) out.push(t); else { onConf(t.id,m,t); out.push(t) }
+  });
+  (ml||[]).forEach(m=>{ if(seen.has(m.id)) return; const b=B[m.id]; if(!b||J(m)!==J(b)) out.push(m) }); // nuevas mías, o cambiadas por mí aunque otro las borró
+  return out;
+}
+function mergePlans(b,m,t){
+  const conflicts=[], res=JSON.parse(J(t));
+  res.steps=mergeList(b.steps,m.steps,t.steps,(id,mine,theirs)=>conflicts.push({id,mine,theirs}));
+  res.starts=mergeList(b.starts,m.starts,t.starts,()=>{});
+  const keys=new Set([...Object.keys(m),...Object.keys(t)]); keys.delete('steps'); keys.delete('starts');
+  keys.forEach(k=>{
+    if(k==='layoutOff'){ const lo=JSON.parse(J(t.layoutOff||{})); const ml=m.layoutOff||{}, bl=b.layoutOff||{};
+      Object.keys(ml).forEach(d=>Object.keys(ml[d]||{}).forEach(id=>{ if(J(ml[d][id])!==J((bl[d]||{})[id])){ lo[d]=lo[d]||{}; lo[d][id]=ml[d][id] } })); res.layoutOff=lo; return }
+    if(J(m[k])!==J(b[k])&&J(t[k])===J(b[k])) res[k]=m[k];
+  });
+  return {data:res,conflicts};
+}
+function finishMerge(d,ver){ applyRemote(d,ver); base=J(JSON.parse(J(pendingRemote&&pendingRemote.data||d))); dirty=true; pendingRemote=null; push() }
+function resolve(r){
+  let res; try{res=mergePlans(JSON.parse(base),JSON.parse(J(data)),r.data)}catch(e){return conflictBasic(r)}
+  base=J(r.data);
+  if(!res.conflicts.length){ applyRemote(res.data,r.version); base=J(r.data); dirty=true; pendingRemote=null; toast(T('Se combinaron tus cambios con los de '+(r.updated_by||'otra persona')+'.','Le tue modifiche sono state unite a quelle di '+(r.updated_by||'un\'altra persona')+'.')); push(); return }
   setStatus('conf'); document.querySelectorAll('.cxconf').forEach(n=>n.remove());
+  const names=res.conflicts.map(c=>((c.theirs||c.mine||{}).title||c.id));
   const ov=document.createElement('div'); ov.className='modal cxconf'; const bx=document.createElement('div'); bx.className='box';
-  bx.innerHTML='<h3 style="margin-top:0">⚠ '+T('Otra persona guardó antes que vos','Un\'altra persona ha salvato prima di te')+'</h3><p>'+T('<b>'+(r.updated_by||'Alguien')+'</b> guardó cambios mientras editabas. Elegí qué hacer:','<b>'+(r.updated_by||'Qualcuno')+'</b> ha salvato modifiche mentre stavi modificando. Scegli cosa fare:')+'</p><div class="row2" style="flex-direction:column;align-items:stretch;gap:8px"><button class="a">'+T('Cargar su versión (descarto mis cambios sin guardar)','Carica la sua versione (scarto le mie modifiche non salvate)')+'</button><button class="b">'+T('Guardar la mía igual (reemplaza la suya; queda en el historial)','Salva la mia comunque (sostituisce la sua; resta nello storico)')+'</button><button class="c">'+T('Decidir después','Decidi dopo')+'</button></div>';
-  bx.querySelector('.a').onclick=()=>{ov.remove(); applyRemote(r.data,r.version); setStatus('ok')};
-  bx.querySelector('.b').onclick=()=>{ov.remove(); rv=r.version; dirty=true; push()};
-  bx.querySelector('.c').onclick=()=>ov.remove();
+  bx.innerHTML='<h3 style="margin-top:0">⚠ '+T('Tocaron la misma escena que vos','Hanno modificato la tua stessa scena')+'</h3><p>'+T('<b>'+(r.updated_by||'Alguien')+'</b> y vos cambiaron estas escenas a la vez:','<b>'+(r.updated_by||'Qualcuno')+'</b> e tu avete modificato queste scene contemporaneamente:')+'</p><ul>'+names.map(n=>'<li>'+n.replace(/</g,'&lt;')+'</li>').join('')+'</ul><p class="hint">'+T('Lo demás de ambos ya se combinó. Elegí con cuál versión te quedás en estas escenas (la otra queda en el historial).','Il resto di entrambi è già stato unito. Scegli quale versione tenere per queste scene (l\'altra resta nello storico).')+'</p><div class="row2" style="flex-direction:column;align-items:stretch;gap:8px"><button class="a">'+T('Me quedo con la mía','Tengo la mia')+'</button><button class="b">'+T('Me quedo con la suya','Tengo la sua')+'</button></div>';
+  const done=mine=>{ ov.remove(); res.conflicts.forEach(c=>{ const i=res.data.steps.findIndex(x=>x.id===c.id); if(mine){ if(c.mine){ if(i>=0) res.data.steps[i]=c.mine; else res.data.steps.push(c.mine) } else if(i>=0) res.data.steps.splice(i,1) } }); applyRemote(res.data,r.version); base=J(r.data); dirty=true; pendingRemote=null; push() };
+  bx.querySelector('.a').onclick=()=>done(true); bx.querySelector('.b').onclick=()=>done(false);
   ov.appendChild(bx); document.body.appendChild(ov);
 }
+function conflictBasic(r){ applyRemote(r.data,r.version); toast(T('Se cargó la versión de '+(r.updated_by||'otra persona'),'Caricata la versione di '+(r.updated_by||'un\'altra persona'))) }
 /* ---- ver cambios de otros ---- */
 async function poll(){
   try{
@@ -3116,6 +3147,7 @@ if(editor){
     };
   }
 }
+if(editor){bar.style.cursor='pointer'; bar.title=T('Clic para cambiar tu nombre','Clic per cambiare il tuo nome'); bar.onclick=()=>{const n=(prompt(T('Tu nombre (lo ven los demás editores):','Il tuo nome (lo vedono gli altri editor):'),who)||'').trim(); if(n){who=n.slice(0,40); try{localStorage.setItem('cx.who',who)}catch(e){} presence()}}}
 setStatus(editor?'ok':'ro');
 if(CX.offline) setStatus('off');
 })();

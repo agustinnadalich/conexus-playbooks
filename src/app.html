@@ -2251,8 +2251,9 @@ $('#kPaste').onclick=()=>{
 };
 
 /* ---------- árbol: estructura, copiar y pegar ---------- */
-function newId(){let n=steps.length+1; while(idxOf('s'+n)>=0) n++; return 's'+n}
-function newIdAvoid(extra){let n=steps.length+1+extra.length; while(idxOf('s'+n)>=0||extra.includes('s'+n)) n++; return 's'+n}
+const rid3=()=>Math.random().toString(36).slice(2,5);
+function newId(){let n=steps.length+1, id; do{id='s'+n+rid3(); n++}while(idxOf(id)>=0); return id}
+function newIdAvoid(extra){let n=steps.length+1+extra.length, id; do{id='s'+n+rid3(); n++}while(idxOf(id)>=0||extra.includes(id)); return id}
 function toast(t){
   document.querySelectorAll('.toast').forEach(n=>n.remove());
   const d=document.createElement('div'); d.className='toast'; d.textContent=t; document.body.appendChild(d);
