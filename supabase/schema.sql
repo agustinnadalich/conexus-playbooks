@@ -19,6 +19,13 @@ create table if not exists public.presence (
   primary key (ws, who)
 );
 
+create table if not exists public.plan_history (
+  ws text not null, version int not null, data jsonb not null,
+  saved_at timestamptz not null default now(), saved_by text,
+  primary key (ws, version)
+);
+alter table public.plan_history enable row level security;
+
 -- Nadie puede leer ni escribir las tablas directamente: solo a través de las funciones de abajo.
 alter table public.access   enable row level security;
 alter table public.plans    enable row level security;
@@ -44,6 +51,39 @@ begin
     'data', p.data, 'updated_at', p.updated_at, 'updated_by', p.updated_by);
 end $$;
 
+-- Solo el número de versión (para detectar cambios sin bajar todo el plan)
+create or replace function public.cx_version(p_hash text) returns jsonb
+language plpgsql security definer set search_path = public as $$
+declare a record; p record;
+begin
+  select * into a from access where hash = p_hash;
+  if not found then return jsonb_build_object('ok', false, 'error', 'auth'); end if;
+  select version, updated_by, updated_at into p from plans where ws = a.ws;
+  return jsonb_build_object('ok', true, 'version', p.version, 'updated_by', p.updated_by, 'updated_at', p.updated_at);
+end $$;
+
+-- Lista de versiones guardadas (solo editor)
+create or replace function public.cx_history(p_hash text) returns jsonb
+language plpgsql security definer set search_path = public as $$
+declare a record; r jsonb;
+begin
+  select * into a from access where hash = p_hash;
+  if not found or a.role <> 'editor' then return '[]'::jsonb; end if;
+  select coalesce(jsonb_agg(jsonb_build_object('version', version, 'saved_at', saved_at, 'saved_by', saved_by) order by version desc), '[]'::jsonb) into r from plan_history where ws = a.ws;
+  return r;
+end $$;
+
+-- Una versión guardada (solo editor)
+create or replace function public.cx_history_get(p_hash text, p_version int) returns jsonb
+language plpgsql security definer set search_path = public as $$
+declare a record; d jsonb;
+begin
+  select * into a from access where hash = p_hash;
+  if not found or a.role <> 'editor' then return jsonb_build_object('ok', false); end if;
+  select data into d from plan_history where ws = a.ws and version = p_version;
+  return jsonb_build_object('ok', d is not null, 'data', d);
+end $$;
+
 -- Guardar el plan (solo editor). Si alguien guardó antes que vos (version distinta) devuelve conflict.
 create or replace function public.cx_save(p_hash text, p_who text, p_base int, p_data jsonb) returns jsonb
 language plpgsql security definer set search_path = public as $$
@@ -58,6 +98,8 @@ begin
       'updated_at', p.updated_at, 'updated_by', p.updated_by);
   end if;
   update plans set data = p_data, version = p.version + 1, updated_at = now(), updated_by = left(p_who, 40) where ws = a.ws;
+  insert into plan_history (ws, version, data, saved_by) values (a.ws, p.version + 1, p_data, left(p_who, 40));
+  delete from plan_history where ws = a.ws and version <= p.version + 1 - 40;
   return jsonb_build_object('ok', true, 'version', p.version + 1);
 end $$;
 
@@ -76,5 +118,5 @@ begin
   return r;
 end $$;
 
-revoke all on function public.cx_get(text), public.cx_save(text,text,int,jsonb), public.cx_presence(text,text,text) from public;
-grant execute on function public.cx_get(text), public.cx_save(text,text,int,jsonb), public.cx_presence(text,text,text) to anon, authenticated;
+revoke all on function public.cx_get(text), public.cx_version(text), public.cx_history(text), public.cx_history_get(text,int), public.cx_save(text,text,int,jsonb), public.cx_presence(text,text,text) from public;
+grant execute on function public.cx_get(text), public.cx_version(text), public.cx_history(text), public.cx_history_get(text,int), public.cx_save(text,text,int,jsonb), public.cx_presence(text,text,text) to anon, authenticated;

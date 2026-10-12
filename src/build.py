@@ -45,6 +45,9 @@ html.cx-viewer #vList,html.cx-viewer #vBoard,html.cx-viewer #uUndo,html.cx-viewe
 #tourCard .ta{display:flex;gap:8px;margin:10px 0 0;flex-wrap:wrap}
 #tourCard .tf{display:flex;gap:8px;align-items:center;margin-top:12px;border-top:1px solid #323c52;padding-top:10px}
 #tourCard .sp{flex:1}#tourCard .tn{font-size:12px;color:#b3bdcc}
+.modal.cxconf{z-index:950}
+#syncBar{position:fixed;left:12px;bottom:12px;z-index:60;background:#1d2435;border:1px solid #323c52;border-radius:999px;padding:4px 12px;font-size:12px;color:#b3bdcc;box-shadow:0 6px 18px rgba(0,0,0,.4)}
+#presWarn{position:fixed;left:50%;transform:translateX(-50%);top:62px;z-index:70;background:#3b1d22;border:1px solid #e7555f;color:#fecaca;border-radius:12px;padding:8px 14px;font-size:13px;display:none;max-width:90vw}
 .wsb{font-size:12px;color:#b3bdcc;border:1px solid #323c52;border-radius:999px;padding:3px 10px;white-space:nowrap}
 .btnlink{display:inline-block;text-decoration:none;color:var(--fg);background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:6px 11px;font-size:13px;white-space:nowrap}
 .btnlink:hover{border-color:var(--pri)}
@@ -69,6 +72,12 @@ body.cx-locked>header,body.cx-locked>main{display:none}
 rep('<script>\n(()=>{\nconst NS=','<script>\nwindow.__startApp=async()=>{\n'+'''{const K0='cx.'+CX.ws+'.plan'; if(!localStorage.getItem(K0)){
   const t=await (async()=>{try{const r=await fetch('data/'+CX.ws+'.json',{cache:'no-store'}); return r.ok?await r.text():null}catch(e){return null}})();
   if(t){try{JSON.parse(t); localStorage.setItem(K0,t)}catch(e){}} }}
+if(CX.cfg&&CX.cfg.key&&CX.hash){ try{
+  const r0=await fetch(CX.cfg.url+'/rest/v1/rpc/cx_get',{method:'POST',headers:Object.assign({apikey:CX.cfg.key,'Content-Type':'application/json'},CX.cfg.key.indexOf('eyJ')===0?{Authorization:'Bearer '+CX.cfg.key}:{}),body:JSON.stringify({p_hash:CX.hash})});
+  const j0=await r0.json();
+  if(j0.ok){ CX.rv=j0.version; if(j0.data&&Array.isArray(j0.data.steps)&&j0.data.steps.length) localStorage.setItem('cx.'+CX.ws+'.plan',JSON.stringify(j0.data)); }
+  else if(j0.error==='auth'){ CX.logout(); return }
+}catch(e){CX.offline=true} }
 const NS=''')
 rep('})();\n</script>\n</body>','};\n</script>\n@@GATE@@\n</body>')
 rep("const KEY='rugbyBoard.tl1';","const KEY='cx.'+CX.ws+'.plan', CLIPKEY='cx.'+CX.ws+'.clip';")
@@ -130,7 +139,7 @@ function openVideo(url){
 
 /* ---------- nuevo inicio ---------- */''')
 rep("Object.entries(KINDS).forEach(([k,v])=>$('#nsKind').add(new Option(`${v.g}  ${v.n}`,k)));","Object.entries(KINDS).forEach(([k,v])=>$('#nsKind').add(new Option(`${v.g}  ${CX.tr(v.n)}`,k)));")
-tour=open(str(ROOT/'src'/'tour.js'),encoding='utf8').read()
+tour=open(str(ROOT/'src'/'tour.js'),encoding='utf8').read()+'\n'+open(str(ROOT/'src'/'sync.js'),encoding='utf8').read()
 rep("lastSnap=JSON.stringify(data);\n$('#uUndo').onclick=undo;","lastSnap=JSON.stringify(data);\n$('#uUndo').onclick=undo;\n"+tour)
 # ---- modo solo lectura ----
 rep("function setView(v){\n  view=v;","function setView(v){\n  if(CX.role==='viewer'&&(v==='list'||v==='board')) v='map';\n  view=v;")
@@ -154,7 +163,7 @@ rep("lastSnap=JSON.stringify(data);\n$('#uUndo').onclick=undo;","document.queryS
 # ---- puerta de acceso + i18n ----
 gate=open(str(ROOT/'src'/'gate.js')).read()
 H=lambda k:hashlib.sha256(('conexus-play|'+k).encode()).hexdigest()
-gate=gate.replace('@@H_SL_V@@',H('sanluis')).replace('@@H_SL_E@@',H('sanluisedit')).replace('@@H_PE_V@@',H('pescararugby')).replace('@@H_PE_E@@',H('pescararugbyedit'))
+gate=gate.replace('@@CFG@@',json.dumps(json.load(open(str(ROOT/'src'/'config.json'))))).replace('@@H_SL_V@@',H('sanluis')).replace('@@H_SL_E@@',H('sanluisedit')).replace('@@H_PE_V@@',H('pescararugby')).replace('@@H_PE_E@@',H('pescararugbyedit'))
 gate=gate.replace('@@IT_EXACT@@',json.dumps(exact,ensure_ascii=False)).replace('@@IT_RULES@@',json.dumps(rules,ensure_ascii=False))
 s=s.replace('@@GATE@@','<script>\n'+gate+'</script>')
 open(OUT,'w',encoding='utf8').write(s)

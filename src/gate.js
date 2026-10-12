@@ -56,9 +56,9 @@
     if(SKIP[n.tagName]) return;
     for(var c=n.firstChild;c;c=c.nextSibling) trNode(c);
   }
-  var CX=window.CX={flag:FLAG,ws:null,wsName:'',role:'viewer',lang:L,tr:tr,
+  var CX=window.CX={cfg:@@CFG@@,hash:null,flag:FLAG,ws:null,wsName:'',role:'viewer',lang:L,tr:tr,
     setLang:function(l){localStorage.setItem('cx.lang',l); location.reload()},
-    logout:function(){['cx.ws','cx.role'].forEach(function(k){sessionStorage.removeItem(k); localStorage.removeItem(k)}); location.reload()},
+    logout:function(){['cx.ws','cx.role','cx.h'].forEach(function(k){sessionStorage.removeItem(k); localStorage.removeItem(k)}); location.reload()},
     workspaces:WORKSPACES};
   document.documentElement.lang=L;
   if(L==='it'){
@@ -113,7 +113,7 @@
     });
   }
   /* ---------- arranque ---------- */
-  function start(ws,role){
+  function start(ws,role,hash){ CX.hash=hash||null;
     CX.ws=ws.id; CX.wsName=ws.name; CX.role=role==='editor'?'editor':'viewer';
     if(CX.role==='viewer') document.documentElement.classList.add('cx-viewer');
     var gate=document.getElementById('cxLogin'); if(gate) gate.remove();
@@ -145,7 +145,7 @@
         var ws=acc&&WORKSPACES[acc.ws];
         if(!ws){ err.textContent=tr('Clave incorrecta. Revisá mayúsculas y espacios.'); pw.select(); return }
         var store=d.querySelector('#cxRem').checked?localStorage:sessionStorage;
-        store.setItem('cx.ws',ws.id); store.setItem('cx.role',acc.role); start(ws,acc.role);
+        store.setItem('cx.ws',ws.id); store.setItem('cx.role',acc.role); store.setItem('cx.h',acc.hash); start(ws,acc.role,acc.hash);
       });
     };
     setTimeout(function(){pw.focus()},50);
@@ -153,7 +153,8 @@
   function boot(){
     if(L==='it') trNode(document.body);
     var id=sessionStorage.getItem('cx.ws')||localStorage.getItem('cx.ws'), role=sessionStorage.getItem('cx.role')||localStorage.getItem('cx.role');
-    if(id&&WORKSPACES[id]&&(role==='viewer'||role==='editor')) start(WORKSPACES[id],role); else showLogin();
+    var hh=sessionStorage.getItem('cx.h')||localStorage.getItem('cx.h');
+    if(id&&WORKSPACES[id]&&(role==='viewer'||role==='editor')&&hh) start(WORKSPACES[id],role,hh); else showLogin();
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot); else boot();
 })();
