@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Conexus · Guía interactiva</title>
+<style>
+:root{--bg:#181E2F;--card:#1D2435;--card2:#232c42;--bd:#323C52;--tx:#F1F5F9;--tx2:#B3BDCC;--pri:#4FD1E5;--or:#F7AE59;--vi:#CDA2EB;--bl:#88B9F2;--rd:#E7555F;--gr:#34D399;--ye:#FACC15}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.6 Montserrat,Inter,system-ui,sans-serif}
+button{font:inherit;color:var(--tx);background:var(--card2);border:1px solid var(--bd);border-radius:10px;padding:7px 12px;cursor:pointer}
+button:hover{border-color:#4a5878}
+button.pri{background:var(--pri);color:#072029;border-color:var(--pri);font-weight:700}
+button.on{border-color:var(--pri);color:var(--pri)}
+input[type=text]{background:#131827;color:var(--tx);border:1px solid var(--bd);border-radius:8px;padding:6px 10px;font:inherit;width:100%}
+.top{position:sticky;top:0;z-index:20;background:rgba(24,30,47,.94);backdrop-filter:blur(8px);border-bottom:1px solid var(--bd);display:flex;gap:12px;align-items:center;padding:8px 16px}
+.top h1{font-size:16px;margin:0;flex:1}
+.flags{display:flex;gap:6px}.flags button{padding:4px 6px;line-height:0;opacity:.55}.flags button.on{opacity:1}
+.prog{height:3px;background:var(--bd);position:sticky;top:49px;z-index:19}.prog i{display:block;height:100%;width:0;background:var(--pri);transition:width .2s}
+.layout{display:grid;grid-template-columns:230px minmax(0,1fr);gap:24px;max-width:1120px;margin:0 auto;padding:20px 16px 90px}
+nav.toc{position:sticky;top:70px;align-self:start;display:flex;flex-direction:column;gap:4px}
+nav.toc a{color:var(--tx2);text-decoration:none;padding:7px 10px;border-radius:10px;font-size:14px;display:flex;gap:8px;align-items:center}
+nav.toc a b{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--card2);border:1px solid var(--bd);font-size:12px;color:var(--tx);flex:none}
+nav.toc a.act{background:var(--card);color:var(--tx)}nav.toc a.act b{background:var(--pri);color:#072029;border-color:var(--pri)}
+@media(max-width:860px){.layout{grid-template-columns:1fr}nav.toc{position:static;flex-direction:row;overflow:auto}nav.toc a span{display:none}}
+section.lesson{background:var(--card);border:1px solid var(--bd);border-radius:18px;padding:22px 22px 26px;margin-bottom:22px;scroll-margin-top:70px}
+section.lesson>h2{margin:0 0 4px;font-size:22px;display:flex;gap:10px;align-items:center}
+section.lesson>h2 b{display:inline-grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--pri);color:#072029;font-size:16px;flex:none}
+.one{color:var(--pri);font-weight:600;margin:2px 0 14px}
+.callout{border-radius:12px;padding:10px 14px;margin:12px 0;background:#161c2c;border:1px solid var(--bd);border-left:4px solid var(--pri);font-size:15px}
+.callout.warn{border-left-color:var(--or)}.callout.ex{border-left-color:var(--vi)}
+.callout b.h{display:block;margin-bottom:2px}
+ol.steps{list-style:none;counter-reset:s;padding:0;margin:12px 0}
+ol.steps li{counter-increment:s;position:relative;padding:6px 0 6px 40px;font-size:15px}
+ol.steps li::before{content:counter(s);position:absolute;left:0;top:5px;width:28px;height:28px;border-radius:50%;background:var(--card2);border:1px solid var(--pri);color:var(--pri);display:grid;place-items:center;font-weight:700;font-size:13px}
+.btn-fake{display:inline-block;background:var(--card2);border:1px solid var(--bd);border-radius:8px;padding:1px 9px;font-size:13.5px;white-space:nowrap}
+code{background:#262f45;border:1px solid var(--bd);border-radius:6px;padding:1px 6px;font-size:.9em}
+.sand{background:#131827;border:1px dashed #44516e;border-radius:16px;padding:12px;margin:14px 0}
+.sand .cap{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--tx2);margin-bottom:8px;display:flex;justify-content:space-between;gap:8px;align-items:center}
+svg.field{width:100%;height:auto;display:block;border-radius:10px;touch-action:none}
+.tl{display:flex;gap:10px;align-items:center;margin:10px 0 4px}
+.tlbar{position:relative;flex:1;height:38px}
+.tlbar input[type=range]{position:absolute;left:0;right:0;top:12px;width:100%;margin:0;accent-color:var(--pri)}
+.dia{position:absolute;top:0;width:12px;height:12px;background:var(--ye);transform:translateX(-50%) rotate(45deg);border-radius:2px}
+.tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:6px}
+.tools label{font-size:13px;color:var(--tx2);display:flex;gap:6px;align-items:center}
+.hintline{min-height:22px;font-size:14px;color:var(--ye);margin-top:6px}
+.tasks{list-style:none;padding:0;margin:10px 0 0;display:grid;gap:6px}
+.tasks li{display:flex;gap:10px;align-items:center;font-size:14.5px;padding:6px 10px;border-radius:10px;background:#161c2c;border:1px solid var(--bd)}
+.tasks li i{width:20px;height:20px;border-radius:50%;border:2px solid var(--bd);display:grid;place-items:center;font-style:normal;font-size:12px;flex:none}
+.tasks li.ok{border-color:var(--gr)}.tasks li.ok i{background:var(--gr);border-color:var(--gr);color:#06281d}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0}
+.chip{display:inline-flex;gap:6px;align-items:center;border:2px solid;border-radius:999px;padding:3px 12px;cursor:pointer;background:#161c2c;font-size:14px}
+.chip.sel{background:var(--card2);box-shadow:0 0 0 2px rgba(255,255,255,.2)}
+.two{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:14px}
+@media(max-width:760px){.two{grid-template-columns:1fr}}
+.tree{display:flex;gap:16px;align-items:stretch;overflow:auto;padding:4px}
+.tnode{border:1px solid var(--bd);background:var(--card2);border-radius:12px;padding:8px 12px;font-size:13.5px;min-width:130px}
+.tnode small{display:block;color:var(--tx2);font-size:11.5px}
+.tnode.dec{border-color:var(--pri)}
+.orow{display:flex;align-items:center;gap:8px;margin:5px 0}
+.orow .lab{border:2px solid;border-radius:999px;padding:2px 10px;font-size:13px;white-space:nowrap}
+.orow .arrow{color:var(--tx2)}
+.ghost{border:2px dashed;border-radius:12px;padding:6px 10px;font-size:13px;color:var(--tx2)}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:12px 0}
+.card{background:#161c2c;border:1px solid var(--bd);border-radius:14px;padding:12px 14px;font-size:14.5px}
+.card h4{margin:0 0 4px;font-size:15px}
+.card .ico{font-size:24px}
+.flow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0}
+.flow .n{border-radius:12px;padding:10px 14px;border:2px solid var(--bd);background:#161c2c;cursor:pointer;font-size:14.5px;min-width:150px}
+.flow .n.act{border-color:var(--pri);background:var(--card2)}
+.flow .ar{color:var(--tx2);font-size:20px}
+.explain{background:#161c2c;border-radius:12px;padding:10px 14px;min-height:64px;font-size:15px;border:1px solid var(--bd)}
+table{border-collapse:collapse;width:100%;font-size:14.5px}td,th{border:1px solid var(--bd);padding:7px 10px;text-align:left;vertical-align:top}th{background:var(--card2)}
+.mapbox{position:relative;height:300px;overflow:hidden;border-radius:10px;background:#101521;background-image:radial-gradient(#26304a 1px,transparent 1px);background-size:18px 18px;touch-action:none}
+.mapbox svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.mn{position:absolute;width:120px;border:1px solid var(--bd);background:var(--card2);border-radius:12px;padding:6px 8px;font-size:12px;cursor:grab;user-select:none;touch-action:none}
+.mn.drag{cursor:grabbing;box-shadow:0 10px 24px rgba(0,0,0,.5);z-index:5}
+.mn .th{height:34px;border-radius:8px;background:#1e5136;margin-bottom:4px;position:relative}
+.mn .th i{position:absolute;width:5px;height:5px;border-radius:50%;background:#4fd1e5;border:1px solid #fff}
+.mn.start{border-color:var(--or)}.mn.ref{border-style:dashed;border-color:var(--vi)}
+footer{color:var(--tx2);text-align:center;font-size:13px;padding:30px 16px}
+.faq details{background:#161c2c;border:1px solid var(--bd);border-radius:12px;padding:8px 14px;margin:8px 0}.faq summary{cursor:pointer;font-weight:600}
+</style>
+</head>
+<body>
+<div class="top"><h1 id="ttl"></h1><div class="flags" id="flags"></div></div>
+<div class="prog"><i id="prog"></i></div>
+<div class="layout"><nav class="toc" id="toc"></nav><main id="main"></main></div>
+<footer id="foot"></footer>
+
+<script>
+(function(){
+'use strict';
+var Q=new URLSearchParams(location.search).get('lang'), LANG=Q||localStorage.getItem('cx.lang')||(navigator.language||'es').slice(0,2); if(LANG!=='it') LANG='es';
+var $=function(s,r){return (r||document).querySelector(s)}, $$=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))};
+function T(es,it){return LANG==='it'?it:es}
+var NS='http://www.w3.org/2000/svg';
+function el(tag,attrs,html){var e=document.createElement(tag); for(var k in (attrs||{})) e.setAttribute(k,attrs[k]); if(html!==undefined) e.innerHTML=html; return e}
+function sv(tag,attrs){var e=document.createElementNS(NS,tag); for(var k in (attrs||{})) e.setAttribute(k,attrs[k]); return e}
+var FLAG={
+ es:'<svg viewBox="0 0 30 20" width="26" height="17"><rect width="30" height="20" fill="#74acdf"/><rect y="6.7" width="30" height="6.6" fill="#fff"/><circle cx="15" cy="10" r="2" fill="#f6b40e"/></svg>',
+ it:'<svg viewBox="0 0 30 20" width="26" height="17"><rect width="10" height="20" fill="#009246"/><rect x="10" width="10" height="20" fill="#fff"/><rect x="20" width="10" height="20" fill="#ce2b37"/></svg>'};
+var PAL=['#F7AE59','#CDA2EB','#88B9F2','#34D399','#FACC15','#E7555F'];
+
+function makeField(){
+  var s=sv('svg',{viewBox:'0 0 100 56','class':'field'});
+  s.innerHTML='<rect width="100" height="56" fill="#1e5136"/><rect width="5" height="56" fill="#143524"/><rect x="95" width="5" height="56" fill="#143524"/>'+
+   '<g stroke="#fff" stroke-opacity=".55" stroke-width=".35"><line x1="5" x2="5" y2="56"/><line x1="95" x2="95" y2="56"/><line x1="15" x2="15" y2="56" stroke-dasharray="1.6 1.6"/><line x1="85" x2="85" y2="56" stroke-dasharray="1.6 1.6"/><line x1="50" x2="50" y2="56" stroke-opacity=".3"/></g>'+
+   '<text x="97.5" y="28" font-size="2.6" fill="#fff" fill-opacity=".6" text-anchor="middle" transform="rotate(-90 97.5 28)">'+T('ATAQUE ↑','ATTACCO ↑')+'</text>';
+  return s;
+}
+function player(svg,p){
+  var g=sv('g',{'class':'pl',style:'cursor:grab'});
+  g.appendChild(sv('circle',{r:3.4,fill:p.fwd?'#2f55c9':'#4fd1e5',stroke:'#fff','stroke-width':.5}));
+  var t=sv('text',{'text-anchor':'middle','dominant-baseline':'central','font-size':3.2,'font-weight':800,fill:p.fwd?'#fff':'#072029',style:'pointer-events:none'}); t.textContent=p.id; g.appendChild(t);
+  svg.appendChild(g); return g;
+}
+function svgPt(svg,e){var pt=svg.createSVGPoint(); pt.x=e.clientX; pt.y=e.clientY; var q=pt.matrixTransform(svg.getScreenCTM().inverse()); return [Math.max(2,Math.min(98,q.x)),Math.max(2,Math.min(54,q.y))]}
+function ball(svg){var b=sv('ellipse',{rx:1.9,ry:1.2,fill:'#f59e0b',stroke:'#fff','stroke-width':.4}); svg.appendChild(b); return b}
+
+/* ---- Lección 1: concepto ---- */
+function lessonConcept(host){
+  var info=[
+   {t:T('① Escena de decisión','① Scena di decisione'),c:'#4FD1E5',d:T('Una “foto” de la cancha. Acá el jugador pregunta: <b>¿qué hago?</b> Tiene <b>opciones</b> (cada una con color, texto y receptores). No se anima: los jugadores solo están acomodados.','Una “foto” del campo. Qui il giocatore si chiede: <b>cosa faccio?</b> Ha delle <b>opzioni</b> (ciascuna con colore, testo e ricevitori). Non si anima: i giocatori sono solo posizionati.')},
+   {t:T('② Escena de animación','② Scena di animazione'),c:'#F7AE59',d:T('Una “película” corta: muestra <b>cómo se ejecuta</b> la opción elegida. Los jugadores y la pelota se mueven con una línea de tiempo y fotogramas.','Un breve “filmato”: mostra <b>come si esegue</b> l\'opzione scelta. Giocatori e pallone si muovono con una timeline e dei fotogrammi.')},
+   {t:T('③ Nueva decisión','③ Nuova decisione'),c:'#4FD1E5',d:T('Donde termina la animación empieza la <b>siguiente decisión</b>. Así se arma un árbol: situación → elección → ejecución → nueva situación.','Dove finisce l\'animazione inizia la <b>decisione successiva</b>. Così si costruisce un albero: situazione → scelta → esecuzione → nuova situazione.')},
+   {t:T('↪ Punto de referencia (ruck)','↪ Punto di riferimento (ruck)'),c:'#CDA2EB',d:T('Un lugar al que <b>muchas jugadas vuelven</b> (por ejemplo, un ruck en el centro). Lo armás una sola vez y todas las ramas lo reutilizan.','Un luogo in cui <b>molti schemi tornano</b> (per esempio un ruck centrale). Lo costruisci una sola volta e tutti i rami lo riutilizzano.')}
+  ];
+  host.innerHTML='<div class="flow" id="cflow"></div><div class="explain" id="cex"></div>';
+  var fl=$('#cflow',host), ex=$('#cex',host);
+  info.forEach(function(n,i){
+    var b=el('div',{'class':'n'},n.t);
+    b.onclick=function(){$$('.n',fl).forEach(function(x){x.classList.remove('act')}); b.classList.add('act'); ex.innerHTML=n.d; ex.style.borderColor=n.c};
+    if(i===3) b.style.borderStyle='dashed';
+    fl.appendChild(b); if(i<3) fl.appendChild(el('span',{'class':'ar'},'→'));
+  });
+  $$('.n',fl)[0].click();
+}
+
+/* ---- Lección 3: mapa libre ---- */
+function lessonMap(host){
+  host.innerHTML='<div class="sand"><div class="cap"><span>'+T('Probalo: arrastrá cualquier caja','Provalo: trascina una qualsiasi casella')+'</span><button id="mo">✨ '+T('Ordenar','Riordina')+'</button></div><div class="mapbox" id="mb"><svg id="ml"></svg></div><div class="hintline" id="mh"></div></div>';
+  var box=$('#mb',host), svg=$('#ml',host), hint=$('#mh',host);
+  var base=[{id:'a',x:10,y:120,t:T('Inicio · Lineout','Inizio · Touche'),k:'start'},{id:'b',x:170,y:120,t:T('Decisión','Decisione')},{id:'c',x:340,y:40,t:T('Animación: abrir al 10','Animazione: aprire al 10')},{id:'d',x:340,y:200,t:T('Animación: pick & go','Animazione: pick & go')},{id:'e',x:520,y:120,t:'↪ Ruck centro',k:'ref'}];
+  var links=[['a','b'],['b','c'],['b','d'],['c','e'],['d','e']], nodes={}, moved=false;
+  function W(){return box.clientWidth}
+  base.forEach(function(n){
+    var d=el('div',{'class':'mn '+(n.k||'')},'<div class="th"><i style="left:12px;top:10px"></i><i style="left:30px;top:16px"></i><i style="left:48px;top:8px"></i><i style="left:64px;top:20px"></i></div><b>'+n.t+'</b>');
+    box.appendChild(d); nodes[n.id]={el:d,x:n.x,y:n.y};
+    d.onpointerdown=function(e){
+      d.setPointerCapture(e.pointerId); d.classList.add('drag'); var sx=e.clientX,sy=e.clientY,ox=nodes[n.id].x,oy=nodes[n.id].y;
+      d.onpointermove=function(ev){nodes[n.id].x=Math.max(0,Math.min(Math.max(0,W()-124),ox+ev.clientX-sx)); nodes[n.id].y=Math.max(0,Math.min(246,oy+ev.clientY-sy)); moved=true; draw()};
+      d.onpointerup=function(){d.classList.remove('drag'); d.onpointermove=null; if(moved) hint.textContent=T('✔ Cada caja recuerda dónde la dejaste. Con Shift mové también todo lo que cuelga de ella.','✔ Ogni casella ricorda dove l\'hai lasciata. Con Shift sposti anche tutto ciò che ne dipende.')};
+    };
+  });
+  function draw(){
+    var w=W(); svg.setAttribute('viewBox','0 0 '+w+' 300'); svg.innerHTML='';
+    links.forEach(function(l){var a=nodes[l[0]],b=nodes[l[1]]; var x1=a.x+120,y1=a.y+36,x2=b.x,y2=b.y+36;
+      svg.appendChild(sv('path',{d:'M'+x1+' '+y1+' C'+(x1+40)+' '+y1+','+(x2-40)+' '+y2+','+x2+' '+y2,fill:'none',stroke:'#6b7a99','stroke-width':1.6}))});
+    Object.keys(nodes).forEach(function(k){nodes[k].el.style.left=nodes[k].x+'px'; nodes[k].el.style.top=nodes[k].y+'px'});
+  }
+  $('#mo',host).onclick=function(){base.forEach(function(n){nodes[n.id].x=n.x; nodes[n.id].y=n.y}); moved=false; hint.textContent=T('Todo volvió al orden automático.','Tutto è tornato all\'ordine automatico.'); draw()};
+  draw(); window.addEventListener('resize',draw);
+}
+
+/* ---- Lecciones 4 y 5: animación con fotogramas ---- */
+function lessonAnim(host,mode){
+  var D=3, P=[{id:9},{id:10},{id:12},{id:13},{id:15},{id:8,fwd:true}];
+  var S={9:[48,38],10:[56,32],12:[65,26],13:[74,22],15:[50,48],8:[40,34]}, E={9:[44,26],10:[58,14],12:[72,10],13:[86,12],15:[44,40],8:[34,20]};
+  var keys={}, st={t:0,sel:null,hold:false,played:false,heldUsed:false,keyMade:false,autoOK:false,playing:false};
+  host.innerHTML='<div class="sand"><div class="cap"><span>'+T('Mini-tablero de práctica','Mini-lavagna di pratica')+'</span><span id="tm">0.0 / 3.0 s</span></div><div id="fw"></div>'+
+   '<div class="tl"><button id="pl" class="pri">▶</button><div class="tlbar" id="tb"><input type="range" id="sl" min="0" max="3" step="0.05" value="0"></div></div>'+
+   '<div class="tools"><button id="kset" title="'+T('Fija en este instante la posición de los jugadores elegidos (o de todos)','Fissa in questo istante la posizione dei giocatori scelti (o di tutti)')+'">◆ '+T('Fijar fotograma','Fissa fotogramma')+'</button>'+
+   (mode==='hold'?'<button id="khold" class="pri">⏸ '+T('Mantener hasta el final','Mantieni fino alla fine')+'</button><label><input type="checkbox" id="kauto"> '+T('mantener tras el último fotograma','mantieni dopo l\'ultimo fotogramma')+'</label>':'')+
+   '<button id="rs">⟲ '+T('Reiniciar práctica','Riavvia pratica')+'</button></div><div class="hintline" id="hl"></div><ul class="tasks" id="tk"></ul></div>';
+  var fw=$('#fw',host), svg=makeField(); fw.appendChild(svg);
+  var trails=sv('g',{}); svg.appendChild(trails); var gp={}; P.forEach(function(p){gp[p.id]=player(svg,p)}); var bl=ball(svg);
+  var sl=$('#sl',host), hl=$('#hl',host);
+  function msg(t){hl.textContent=t}
+  function reset(){keys={}; P.forEach(function(p){keys[p.id]=[[0,S[p.id][0],S[p.id][1]],[D,E[p.id][0],E[p.id][1]]]}); st.t=0; st.sel=null; st.played=false; st.heldUsed=false; st.keyMade=false; st.autoOK=false; sl.value=0; if($('#kauto',host)) $('#kauto',host).checked=false; st.hold=false; refresh(); msg('')}
+  function pos(id,t){var a=keys[id]; for(var i=0;i<a.length-1;i++){if(t<=a[i+1][0]+1e-9){var span=a[i+1][0]-a[i][0], u=span<1e-6?1:(t-a[i][0])/span; u=u*u*(3-2*u); return [a[i][1]+(a[i+1][1]-a[i][1])*u,a[i][2]+(a[i+1][2]-a[i][2])*u]}} var l=a[a.length-1]; return [l[1],l[2]]}
+  function refresh(){
+    trails.innerHTML='';
+    P.forEach(function(p){var pts=[]; for(var k=0;k<=30;k++){var q=pos(p.id,D*k/30); pts.push(q[0].toFixed(1)+','+q[1].toFixed(1))}
+      var a=keys[p.id][0],b=keys[p.id][keys[p.id].length-1];
+      if(Math.hypot(a[1]-b[1],a[2]-b[2])>.8||keys[p.id].length>2){trails.appendChild(sv('polyline',{points:pts.join(' '),fill:'none',stroke:'#fff','stroke-opacity':.7,'stroke-width':.5,'stroke-dasharray':'1.4 1'})); trails.appendChild(sv('circle',{cx:b[1],cy:b[2],r:1,fill:'none',stroke:'#fff','stroke-width':.4}))}
+      keys[p.id].slice(1,-1).forEach(function(k){trails.appendChild(sv('circle',{cx:k[1],cy:k[2],r:1.1,fill:'#FACC15',stroke:'#fff','stroke-width':.3}))});
+      var q=pos(p.id,st.t); gp[p.id].setAttribute('transform','translate('+q[0]+' '+q[1]+')');
+      gp[p.id].firstChild.setAttribute('stroke',st.sel===p.id?'#FACC15':'#fff'); gp[p.id].firstChild.setAttribute('stroke-width',st.sel===p.id?1.1:.5);
+    });
+    var b9=pos(9,st.t); bl.setAttribute('cx',b9[0]+3.2); bl.setAttribute('cy',b9[1]+1.4);
+    $('#tm',host).textContent=st.t.toFixed(1)+' / '+D.toFixed(1)+' s';
+    $$('.dia',host).forEach(function(d){d.remove()});
+    var all={}; P.forEach(function(p){keys[p.id].slice(1,-1).forEach(function(k){all[k[0].toFixed(2)]=k[0]})});
+    Object.keys(all).forEach(function(k){var d=el('div',{'class':'dia'}); d.style.left=(all[k]/D*100)+'%'; $('#tb',host).appendChild(d)});
+    tasks();
+  }
+  function targets(){return st.sel!==null?[st.sel]:P.map(function(p){return p.id})}
+  function setKey(id,t,x,y){var a=keys[id],j=-1; a.forEach(function(k,i){if(Math.abs(k[0]-t)<.04) j=i});
+    if(j>=0){a[j][1]=x;a[j][2]=y}else{a.push([+t.toFixed(2),x,y]); a.sort(function(p,q){return p[0]-q[0]})}
+    if(st.hold&&a.length>=3&&Math.abs(a[a.length-2][0]-t)<.05){var e=a[a.length-1]; e[1]=x; e[2]=y; st.autoOK=true}
+    if(st.hold&&a.length===2){/* sin fotogramas intermedios */}
+  }
+  P.forEach(function(p){
+    var g=gp[p.id];
+    g.onpointerdown=function(e){
+      e.preventDefault(); g.setPointerCapture(e.pointerId); st.sel=p.id;
+      g.onpointermove=function(ev){
+        var q=svgPt(svg,ev), a=keys[p.id];
+        if(st.t<.05){a[0][1]=q[0];a[0][2]=q[1]; msg(T('Estás moviendo la posición de INICIO de este jugador.','Stai spostando la posizione di INIZIO di questo giocatore.'))}
+        else if(st.t>D-.05){var l=a[a.length-1]; l[1]=q[0]; l[2]=q[1]; msg(T('Estás moviendo la posición FINAL de este jugador.','Stai spostando la posizione FINALE di questo giocatore.'))}
+        else{setKey(p.id,st.t,q[0],q[1]); st.keyMade=true; msg(T('◆ Fotograma creado a los '+st.t.toFixed(1)+' s: el jugador pasa por acá en ese instante.','◆ Fotogramma creato a '+st.t.toFixed(1)+' s: il giocatore passa di qui in quell\'istante.'))}
+        refresh();
+      };
+      g.onpointerup=function(){g.onpointermove=null; refresh()};
+    };
+  });
+  sl.oninput=function(){st.t=+sl.value; refresh()};
+  var timer=null;
+  $('#pl',host).onclick=function(){
+    if(st.playing){clearInterval(timer); st.playing=false; $('#pl',host).textContent='▶'; return}
+    if(st.t>=D-.01) st.t=0; st.playing=true; $('#pl',host).textContent='⏸'; var last=performance.now();
+    timer=setInterval(function(){var n=performance.now(); st.t=Math.min(D,st.t+(n-last)/1000); last=n; sl.value=st.t; refresh(); if(st.t>=D){clearInterval(timer); st.playing=false; $('#pl',host).textContent='▶'; st.played=true; refresh()}},30);
+  };
+  $('#kset',host).onclick=function(){
+    if(st.t<.05||st.t>D-.05) return msg(T('Elegí un instante intermedio (mové la barra).','Scegli un istante intermedio (muovi la barra).'));
+    targets().forEach(function(id){var q=pos(id,st.t); setKey(id,st.t,q[0],q[1])}); st.keyMade=true; msg(T('◆ Posición congelada en este instante.','◆ Posizione congelata in questo istante.')); refresh();
+  };
+  if(mode==='hold'){
+    $('#khold',host).onclick=function(){
+      targets().forEach(function(id){var q=pos(id,st.t); keys[id]=keys[id].filter(function(k){return k[0]<=st.t+.04&&k[0]<D-.04}); var last=keys[id][keys[id].length-1]; if(st.t>.05&&Math.abs(last[0]-st.t)>.04) keys[id].push([+st.t.toFixed(2),q[0],q[1]]); keys[id].push([D,q[0],q[1]])});
+      st.heldUsed=true; msg(st.t<.05?T('Quedan quietos durante todo el paso.','Restano fermi per tutto il passo.'):T('Quedan quietos desde '+st.t.toFixed(1)+' s hasta el final.','Restano fermi da '+st.t.toFixed(1)+' s fino alla fine.')); refresh();
+    };
+    $('#kauto',host).onchange=function(e){st.hold=e.target.checked; msg(st.hold?T('Activado: lo que muevas a mano se queda ahí hasta el final.','Attivato: ciò che sposti a mano resta lì fino alla fine.'):'')};
+  }
+  $('#rs',host).onclick=function(){if(st.playing)$('#pl',host).click(); reset()};
+  function tasks(){
+    var L=mode==='hold'?[
+      [st.played,T('Apretá ▶ y mirá: todos se desplazan hacia su posición final (el “problema”).','Premi ▶ e guarda: tutti si spostano verso la posizione finale (il “problema”).')],
+      [st.heldUsed,T('Poné la barra en 0 s y apretá «⏸ Mantener hasta el final»: ahora todos quedan quietos.','Metti la barra a 0 s e premi «⏸ Mantieni fino alla fine»: ora restano tutti fermi.')],
+      [st.autoOK,T('Activá «mantener tras el último fotograma», poné la barra en 1,5 s y arrastrá al 10: se queda ahí hasta el final.','Attiva «mantieni dopo l\'ultimo fotogramma», metti la barra a 1,5 s e trascina il 10: resta lì fino alla fine.')]
+    ]:[
+      [st.played,T('Apretá ▶ y mirá cómo van del inicio al final.','Premi ▶ e guarda come vanno dall\'inizio alla fine.')],
+      [st.keyMade,T('Poné la barra en 1,5 s y arrastrá al 12 a otro lugar: aparece un ◆ (fotograma).','Metti la barra a 1,5 s e trascina il 12 altrove: compare un ◆ (fotogramma).')]
+    ];
+    $('#tk',host).innerHTML=L.map(function(x){return '<li class="'+(x[0]?'ok':'')+'"><i>'+(x[0]?'✓':'')+'</i><span>'+x[1]+'</span></li>'}).join('');
+  }
+  reset();
+}
+
+/* ---- Lección 6: opciones y receptores ---- */
+function lessonOptions(host){
+  var P=[{id:9},{id:10},{id:12},{id:13},{id:15},{id:8,fwd:true},{id:7,fwd:true}];
+  var POS={9:[48,38],10:[58,32],12:[68,26],13:[78,22],15:[46,50],8:[40,34],7:[36,44]};
+  var O=[{label:T('Abrir al 10','Aprire al 10'),color:PAL[0],rec:[10],scene:false}], cur=0;
+  host.innerHTML='<div class="sand"><div class="cap"><span>'+T('Escena de decisión · probá','Scena di decisione · prova')+'</span></div><div class="two"><div id="fw"></div><div><div class="chips" id="ch"></div><div id="ed"></div></div></div><div class="hintline" id="hl"></div>'+
+   '<div class="cap" style="margin-top:12px"><span>'+T('Cómo queda en el mapa','Come appare nella mappa')+'</span></div><div class="tree" id="tr"></div></div>';
+  var svg=makeField(); $('#fw',host).appendChild(svg); var rings=sv('g',{}); svg.appendChild(rings);
+  P.forEach(function(p){var g=player(svg,p); g.style.cursor='pointer'; g.setAttribute('transform','translate('+POS[p.id][0]+' '+POS[p.id][1]+')');
+    g.onclick=function(){var o=O[cur]; if(!o) return; var i=o.rec.indexOf(p.id); if(i>=0) o.rec.splice(i,1); else o.rec.push(p.id); draw(); $('#hl',host).textContent=T('Receptores de «'+o.label+'»: '+(o.rec.join(', ')||'ninguno'),'Ricevitori di «'+o.label+'»: '+(o.rec.join(', ')||'nessuno'))}});
+  function draw(){
+    rings.innerHTML=''; O.forEach(function(o,oi){o.rec.forEach(function(id){rings.appendChild(sv('circle',{cx:POS[id][0],cy:POS[id][1],r:5.2+oi*1.3,fill:'none',stroke:o.color,'stroke-width':oi===cur?1.3:.8,'stroke-opacity':oi===cur?1:.6}))})});
+    var ch=$('#ch',host); ch.innerHTML='';
+    O.forEach(function(o,oi){var c=el('span',{'class':'chip'+(oi===cur?' sel':''),style:'border-color:'+o.color},'<b style="color:'+o.color+'">'+String.fromCharCode(65+oi)+'</b><span>'+(o.label||'…')+'</span>'); c.onclick=function(){cur=oi; draw()}; ch.appendChild(c)});
+    if(O.length<4){var a=el('button',{},'＋ '+T('Opción','Opzione')); a.onclick=function(){O.push({label:T('Opción ','Opzione ')+String.fromCharCode(65+O.length),color:PAL[O.length%PAL.length],rec:[],scene:false}); cur=O.length-1; draw()}; ch.appendChild(a)}
+    var o=O[cur], ed=$('#ed',host); ed.innerHTML='<label style="font-size:12px;color:var(--tx2)">'+T('Texto de la opción','Testo dell\'opzione')+'</label><input type="text" id="lb"><div style="font-size:13px;color:var(--tx2);margin-top:8px">'+T('Receptores: <b>tocá a los jugadores en la cancha</b> para marcarlos (aparece un aro del color de la opción).','Ricevitori: <b>tocca i giocatori sul campo</b> per segnarli (compare un anello del colore dell\'opzione).')+'</div>';
+    var inp=$('#lb',host); inp.value=o.label; inp.oninput=function(){o.label=inp.value; var c=$$('.chip',ch)[cur]; if(c) c.lastChild.textContent=o.label||'…'; tree()};
+    tree();
+  }
+  function tree(){
+    var tr=$('#tr',host); tr.innerHTML=''; var root=el('div',{'class':'tnode dec',style:'align-self:center'},'<b>'+T('◇ Decisión','◇ Decisione')+'</b><small>'+O.length+' '+T('opciones','opzioni')+'</small>'); var col=el('div',{style:'display:flex;flex-direction:column;justify-content:center'});
+    O.forEach(function(o){
+      var row=el('div',{'class':'orow'}); row.appendChild(el('span',{'class':'arrow'},'→')); row.appendChild(el('span',{'class':'lab',style:'border-color:'+o.color+';color:'+o.color},o.label||'…'));
+      row.appendChild(el('span',{'class':'arrow'},'→'));
+      if(o.scene){row.appendChild(el('div',{'class':'tnode',style:'border-color:'+o.color},'<b>▶ '+T('Animación','Animazione')+'</b><small>'+T('Receptores','Ricevitori')+': '+(o.rec.join(', ')||'—')+'</small>')); row.appendChild(el('span',{'class':'arrow'},'→')); row.appendChild(el('div',{'class':'tnode dec'},'<b>'+T('◇ Nueva decisión','◇ Nuova decisione')+'</b>'))}
+      else{var g=el('div',{'class':'ghost',style:'border-color:'+o.color},T('Sin escena (fantasma) ','Senza scena (fantasma) ')); var b=el('button',{},'＋ '+T('Crear animación','Crea animazione')); b.onclick=function(){o.scene=true; $('#hl',host).textContent=T('Se creó una animación desde las posiciones actuales. Falta animarla.','È stata creata un\'animazione dalle posizioni attuali. Resta da animarla.'); tree()}; g.appendChild(b); row.appendChild(g)}
+      col.appendChild(row)});
+    tr.appendChild(root); tr.appendChild(col);
+  }
+  draw();
+}
+
+function build(){
+  document.documentElement.lang=LANG; document.title='Conexus · '+T('Guía interactiva','Guida interattiva');
+  $('#ttl').textContent='Conexus · '+T('Plan de juego — Guía interactiva','Piano di gioco — Guida interattiva');
+  var fl=$('#flags'); fl.innerHTML=''; ['es','it'].forEach(function(l){var b=el('button',{'class':l===LANG?'on':'',title:l==='es'?'Español':'Italiano'},FLAG[l]); b.onclick=function(){LANG=l; try{localStorage.setItem('cx.lang',l)}catch(e){} build()}; fl.appendChild(b)});
+  var main=$('#main'); main.innerHTML='';
+  var B=function(a,b){return '<span class="btn-fake">'+T(a,b)+'</span>'};
+  var L=[
+   {t:T('La idea en 1 minuto','L\'idea in 1 minuto'),one:T('Un plan de juego es un árbol: situación → decisión → ejecución → nueva situación.','Un piano di gioco è un albero: situazione → decisione → esecuzione → nuova situazione.'),
+    html:'<div id="s0"></div><div class="callout"><b class="h">'+T('Tip','Consiglio')+'</b>'+T('Primero armá el <b>camino principal</b> de la jugada. Las alternativas las sumás después, como opciones.','Prima costruisci il <b>percorso principale</b> dello schema. Le alternative le aggiungi dopo, come opzioni.')+'</div>',init:function(h){lessonConcept($('#s0',h))}},
+   {t:T('Entrar, espacios y permisos','Accesso, spazi e permessi'),one:T('Cada clave abre un espacio y define si podés editar o solo mirar.','Ogni password apre uno spazio e stabilisce se puoi modificare o solo guardare.'),
+    html:'<table><tr><th>'+T('Clave','Password')+'</th><th>'+T('Espacio','Spazio')+'</th><th>'+T('Permiso','Permesso')+'</th></tr><tr><td><code>SanLuis</code></td><td>San Luis</td><td>👁 '+T('Solo lectura: mapa y presentación (jugadores)','Sola lettura: mappa e presentazione (giocatori)')+'</td></tr><tr><td><code>SanLuisEdit</code></td><td>San Luis</td><td>✎ '+T('Edición (entrenadores)','Modifica (allenatori)')+'</td></tr><tr><td><code>PescaraRugby</code></td><td>Pescara Rugby</td><td>👁 '+T('Solo lectura','Sola lettura')+'</td></tr><tr><td><code>PescaraRugbyEdit</code></td><td>Pescara Rugby</td><td>✎ '+T('Edición','Modifica')+'</td></tr></table>'+
+    '<ol class="steps"><li>'+T('Escribí la clave (no importan mayúsculas ni espacios) y tocá <b>Ingresar</b>.','Scrivi la password (maiuscole e spazi non contano) e premi <b>Entra</b>.')+'</li><li>'+T('Cambiá el idioma con las banderas 🇦🇷 / 🇮🇹 (arriba a la derecha).','Cambia lingua con le bandiere 🇦🇷 / 🇮🇹 (in alto a destra).')+'</li><li>'+T('La insignia de arriba te dice en qué espacio estás y si podés editar.','Il badge in alto ti dice in quale spazio sei e se puoi modificare.')+'</li><li>'+B('⎋ Salir','⎋ Esci')+' '+T('para cambiar de espacio.','per cambiare spazio.')+'</li></ol>'+
+    '<div class="callout warn"><b class="h">'+T('Importante','Importante')+'</b>'+T('La clave es un filtro simple, no una caja fuerte. Y por ahora lo que editás se guarda <b>en tu navegador</b>: usá «Descargar» para tener copia. (Más adelante se compartirá entre todo el staff.)','La password è un filtro semplice, non una cassaforte. E per ora ciò che modifichi si salva <b>nel tuo browser</b>: usa «Scarica» per avere una copia. (In futuro verrà condiviso con tutto lo staff.)')+'</div>'},
+   {t:T('El mapa: ver y ordenar todo','La mappa: vedere e ordinare tutto'),one:T('Cada carril es un inicio; cada caja, una escena; cada línea de color, una opción.','Ogni corsia è un inizio; ogni casella una scena; ogni linea colorata un\'opzione.'),
+    html:'<div id="s2"></div><ol class="steps"><li>'+T('<b>Arrastrá el fondo</b> para moverte y la <b>rueda</b> para hacer zoom.','<b>Trascina lo sfondo</b> per spostarti e la <b>rotellina</b> per lo zoom.')+'</li><li>'+T('<b>Un clic</b> selecciona una escena; <b>doble clic</b> la abre en el tablero.','<b>Un clic</b> seleziona una scena; <b>doppio clic</b> la apre nella lavagna.')+'</li><li>'+T('<b>＋</b> al costado de una caja agrega una opción o un paso siguiente.','<b>＋</b> accanto a una casella aggiunge un\'opzione o un passo successivo.')+'</li><li>'+T('<b>Arrastrá cualquier caja</b> (incluso las punteadas) para ordenar: queda donde la dejes. <b>Shift</b> mueve también lo que cuelga; <b>Alt</b> reordena/inserta/reemplaza.','<b>Trascina qualsiasi casella</b> (anche quelle tratteggiate) per ordinare: resta dove la lasci. <b>Shift</b> sposta anche ciò che ne dipende; <b>Alt</b> riordina/inserisce/sostituisce.')+'</li><li>'+B('✨ Ordenar','✨ Riordina')+' '+T('vuelve al orden automático.','torna all\'ordine automatico.')+'</li></ol>'+
+    '<div class="cards"><div class="card"><div class="ico">⬜</div><h4>'+T('Caja punteada de color','Casella tratteggiata colorata')+'</h4>'+T('Opción sin escena todavía (“fantasma”). Tocá <b>＋ Crear escena</b>.','Opzione ancora senza scena (“fantasma”). Premi <b>＋ Crea scena</b>.')+'</div><div class="card"><div class="ico">↪</div><h4>'+T('Vuelve a…','Torna a…')+'</h4>'+T('Ficha violeta: la rama regresa a un punto de referencia (ruck, inicio).','Scheda viola: il ramo torna a un punto di riferimento (ruck, inizio).')+'</div><div class="card"><div class="ico">🎬</div><h4>Video</h4>'+T('Insignia en las escenas que tienen un link de video.','Badge sulle scene che hanno un link video.')+'</div></div>',init:function(h){lessonMap($('#s2',h))}},
+   {t:T('Tu primera animación','La tua prima animazione'),one:T('Definís dónde empieza y termina cada jugador; en el medio, los fotogramas ◆ marcan por dónde pasa.','Definisci dove inizia e finisce ogni giocatore; nel mezzo, i fotogrammi ◆ indicano da dove passa.'),
+    html:'<ol class="steps"><li>'+T('En el <b>mapa</b>, <b>＋</b> → agregá un paso. Abrilo con doble clic (<b>tablero</b>).','Nella <b>mappa</b>, <b>＋</b> → aggiungi un passo. Aprilo con doppio clic (<b>lavagna</b>).')+'</li><li>'+T('Tipo de escena: <b>Animación</b>.','Tipo di scena: <b>Animazione</b>.')+'</li><li>'+T('Con la barra en <b>0</b>, arrastrá a los jugadores al <b>inicio</b>. En el <b>último segundo</b>, al <b>final</b>.','Con la barra su <b>0</b>, trascina i giocatori all\'<b>inizio</b>. All\'<b>ultimo secondo</b>, alla <b>fine</b>.')+'</li><li>'+T('En un instante intermedio, arrastrá un jugador: se crea un <b>◆ fotograma</b> y el recorrido se curva por ahí.','In un istante intermedio, trascina un giocatore: si crea un <b>◆ fotogramma</b> e il percorso si curva da lì.')+'</li><li>'+B('▶ Reproducir','▶ Riproduci')+', '+T('ajustá <b>velocidad</b> (1–10) y <b>duración</b>.','regola <b>velocità</b> (1–10) e <b>durata</b>.')+'</li></ol><div id="s3"></div>'+
+    '<div class="callout"><b class="h">'+T('Tip','Consiglio')+'</b>'+T('Para una <b>pausa</b>: fijá el mismo punto en dos instantes distintos. El pase “llega” porque la pelota sigue al jugador por su recorrido.','Per una <b>pausa</b>: fissa lo stesso punto in due istanti diversi. Il passaggio “arriva” perché il pallone segue il giocatore lungo il percorso.')+'</div>',init:function(h){lessonAnim($('#s3',h),'frames')}},
+   {t:T('«Mantener hasta el final»','«Mantieni fino alla fine»'),one:T('Para que nadie se mueva solo: los jugadores se quedan quietos y movés solo los que querés.','Perché nessuno si muova da solo: i giocatori restano fermi e sposti solo quelli che vuoi.'),
+    html:'<p>'+T('En una animación, todos van hacia su <b>posición final</b>. Antes, para que solo algunos se movieran había que copiar y pegar fotogramas. Ahora:','In un\'animazione tutti vanno verso la loro <b>posizione finale</b>. Prima, per far muovere solo alcuni, bisognava copiare e incollare fotogrammi. Ora:')+'</p><ul><li>'+B('⏸ Mantener hasta el final','⏸ Mantieni fino alla fine')+': '+T('los jugadores elegidos (o todos) se quedan quietos <b>desde el instante de la barra</b> hasta el final. En <b>0 s</b> quedan quietos todo el paso.','i giocatori scelti (o tutti) restano fermi <b>dall\'istante della barra</b> fino alla fine. A <b>0 s</b> restano fermi per tutto il passo.')+'</li><li>'+B('☐ mantener tras el último fotograma','☐ mantieni dopo l\'ultimo fotogramma')+': '+T('cada vez que movés un jugador en un instante intermedio, <b>se queda ahí</b> hasta el final.','ogni volta che sposti un giocatore in un istante intermedio, <b>resta lì</b> fino alla fine.')+'</li></ul><div id="s4"></div>'+
+    '<div class="callout ex"><b class="h">'+T('Receta','Ricetta')+'</b>'+T('Barra en 0 → <b>⏸ Mantener</b> (todos quietos) → activá la casilla → llevá la barra a 1 s y arrastrá solo al 10 → listo: solo el 10 se mueve.','Barra a 0 → <b>⏸ Mantieni</b> (tutti fermi) → attiva la casella → porta la barra a 1 s e trascina solo il 10 → fatto: si muove solo il 10.')+'</div>',init:function(h){lessonAnim($('#s4',h),'hold')}},
+   {t:T('Escena de opciones y receptores','Scena di opzioni e ricevitori'),one:T('La escena de decisión muestra las opciones; cada una apunta a la animación que la ejecuta.','La scena di decisione mostra le opzioni; ognuna punta all\'animazione che la esegue.'),
+    html:'<ol class="steps"><li>'+T('En el tablero: Tipo de escena → <b>Decisión (estática)</b>. Podés acomodar a los jugadores libremente.','Nella lavagna: Tipo di scena → <b>Decisione (statica)</b>. Puoi sistemare liberamente i giocatori.')+'</li><li>'+B('＋ Opción','＋ Opzione')+': '+T('escribí el texto y elegí un <b>color</b>.','scrivi il testo e scegli un <b>colore</b>.')+'</li><li>'+T('<b>Receptores</b>: tocá a los jugadores a los que puede ir la pelota en esa opción (aros de color).','<b>Ricevitori</b>: tocca i giocatori a cui può andare il pallone con quell\'opzione (anelli colorati).')+'</li><li>'+T('<b>Destino</b>: buscá una escena existente, o creá una nueva (animación o decisión) que nace desde las posiciones actuales.','<b>Destinazione</b>: cerca una scena esistente, oppure creane una nuova (animazione o decisione) che nasce dalle posizioni attuali.')+'</li></ol><div id="s5"></div>'+
+    '<div class="callout warn"><b class="h">'+T('Borrar sin miedo','Eliminare senza paura')+'</b>'+T('Si borrás una escena, nunca se borra “hacia arriba”: las opciones que apuntaban a ella quedan como fantasmas para reconectarlas (<b>🔗 Reconectar opciones</b> en la Lista).','Se elimini una scena, non si cancella mai “verso l\'alto”: le opzioni che puntavano a lei restano fantasma per ricollegarle (<b>🔗 Ricollega opzioni</b> nell\'Elenco).')+'</div>',init:function(h){lessonOptions($('#s5',h))}},
+   {t:T('Textos, flechas, video y referencias','Testi, frecce, video e riferimenti'),one:T('Cuatro herramientas para explicar mejor.','Quattro strumenti per spiegare meglio.'),
+    html:'<div class="cards"><div class="card"><div class="ico">T</div><h4>'+T('Texto','Testo')+'</h4>'+T('<b>T Texto</b> pone una nota en la cancha: tamaño, color, flecha y en qué segundos aparece/desaparece.','<b>T Testo</b> mette una nota sul campo: dimensione, colore, freccia e in quali secondi compare/scompare.')+'</div><div class="card"><div class="ico">↗</div><h4>'+T('Flecha alternativa','Freccia alternativa')+'</h4>'+T('Dibuja una segunda posibilidad de un jugador (Op1/Op2) sin crear otra escena.','Disegna una seconda possibilità di un giocatore (Op1/Op2) senza creare un\'altra scena.')+'</div><div class="card"><div class="ico">🎬</div><h4>Video</h4>'+T('Pegá un link (YouTube, Vimeo…) en <b>Video (link)</b>. En la presentación aparece el botón <b>🎬 Video</b>.','Incolla un link (YouTube, Vimeo…) in <b>Video (link)</b>. Nella presentazione compare il pulsante <b>🎬 Video</b>.')+'</div><div class="card"><div class="ico">↪</div><h4>'+T('Puntos de referencia','Punti di riferimento')+'</h4>'+T('Rucks (5 m izq., 15 m izq., centro, 15 m der., 5 m der.): al terminar una jugada, <b>conectá</b> la opción al ruck en vez de rehacerlo.','Ruck (5 m sx, 15 m sx, centro, 15 m dx, 5 m dx): alla fine di uno schema, <b>collega</b> l\'opzione al ruck invece di rifarlo.')+'</div></div>'},
+   {t:T('Presentar y compartir','Presentare e condividere'),one:T('Los jugadores navegan el plan; los entrenadores lo editan.','I giocatori navigano il piano; gli allenatori lo modificano.'),
+    html:'<ol class="steps"><li>'+T('Elegí la escena y tocá <b>▶ Presentar desde aquí</b>.','Scegli la scena e premi <b>▶ Presenta da qui</b>.')+'</li><li>'+T('Se ve el título, la explicación y un botón grande por opción (con su color). Se toca una opción y el plan avanza.','Si vedono titolo, spiegazione e un grande pulsante per opzione (con il suo colore). Si tocca un\'opzione e il piano avanza.')+'</li><li><b>◀ '+T('Atrás','Indietro')+'</b>, <b>▶ '+T('Repetir paso','Ripeti passo')+'</b> '+T('y el listado de pasos para saltar.','e l\'elenco dei passi per saltare.')+'</li></ol>'+
+    '<div class="cards"><div class="card"><div class="ico">👁</div><h4>'+T('Para jugadores','Per i giocatori')+'</h4>'+T('Clave de solo lectura (ej. <code>SanLuis</code>): ven el mapa y la presentación; no pueden modificar nada.','Password di sola lettura (es. <code>SanLuis</code>): vedono mappa e presentazione; non possono modificare nulla.')+'</div><div class="card"><div class="ico">✎</div><h4>'+T('Para entrenadores','Per gli allenatori')+'</h4>'+T('Clave de edición (ej. <code>SanLuisEdit</code>): todo el sistema, Lista, Tablero, copias.','Password di modifica (es. <code>SanLuisEdit</code>): tutto il sistema, Elenco, Lavagna, copie.')+'</div><div class="card"><div class="ico">💾</div><h4>'+T('Copias','Copie')+'</h4>'+T('<b>↶ ↷</b> deshacer/rehacer, copias automáticas, <b>Descargar</b> / <b>Cargar…</b> un archivo .json.','<b>↶ ↷</b> annulla/ripristina, copie automatiche, <b>Scarica</b> / <b>Carica…</b> un file .json.')+'</div></div>'},
+   {t:T('Receta completa y dudas','Ricetta completa e dubbi'),one:T('Una jugada de principio a fin.','Uno schema dall\'inizio alla fine.'),
+    html:'<ol class="steps"><li>'+T('<b>Mapa</b> → inicio “Lineout 5 m izquierda”.','<b>Mappa</b> → inizio “Touche 5 m sinistra”.')+'</li><li>'+T('Primera escena: ubicá los 15 y la pelota. Tipo <b>Decisión</b>.','Prima scena: posiziona i 15 e il pallone. Tipo <b>Decisione</b>.')+'</li><li>'+T('Agregá opciones (“Tirar al 2º salto”, “Maul”), con color y receptores.','Aggiungi opzioni (“Lancio al 2º salto”, “Maul”), con colore e ricevitori.')+'</li><li>'+T('Por cada opción: creá la animación y armá los fotogramas. Usá <b>⏸ Mantener</b> para que se muevan solo los que importan.','Per ogni opzione: crea l\'animazione e costruisci i fotogrammi. Usa <b>⏸ Mantieni</b> perché si muovano solo quelli che contano.')+'</li><li>'+T('Terminá en un ruck: conectá al <b>punto de referencia</b>.','Termina in un ruck: collega al <b>punto di riferimento</b>.')+'</li><li>'+T('Agregá link de video, ordená el mapa, probá en <b>Presentar</b>.','Aggiungi il link video, ordina la mappa, prova in <b>Presenta</b>.')+'</li><li>'+T('<b>Descargá</b> una copia.','<b>Scarica</b> una copia.')+'</li></ol>'+
+    '<div class="faq"><details><summary>'+T('No veo lo que cargó mi colega','Non vedo ciò che ha caricato il collega')+'</summary>'+T('Por ahora cada navegador guarda lo suyo. Que descargue su plan y lo cargues con <i>Cargar…</i>.','Per ora ogni browser salva per conto suo. Fagli scaricare il piano e caricalo con <i>Carica…</i>.')+'</details><details><summary>'+T('Perdí mi plan','Ho perso il mio piano')+'</summary>'+T('Se borraron los datos del navegador. Cargá tu último archivo descargado o restaurá una copia automática.','Sono stati cancellati i dati del browser. Carica l\'ultimo file scaricato o ripristina una copia automatica.')+'</details><details><summary>'+T('El video no se incrusta','Il video non si incorpora')+'</summary>'+T('Algunos sitios lo bloquean: se abre en una pestaña nueva.','Alcuni siti lo bloccano: si apre in una nuova scheda.')+'</details><details><summary>'+T('Una opción no lleva a nada','Un\'opzione non porta a nulla')+'</summary>'+T('Es un fantasma (caja punteada). Elegí destino o creá la escena.','È un fantasma (casella tratteggiata). Scegli la destinazione o crea la scena.')+'</details><details><summary>'+T('Los textos que escribí no cambian de idioma','I testi che ho scritto non cambiano lingua')+'</summary>'+T('Solo se traduce la interfaz; tus textos quedan como los escribiste.','Si traduce solo l\'interfaccia; i tuoi testi restano come li hai scritti.')+'</details></div>'}
+  ];
+  var toc=$('#toc'); toc.innerHTML='';
+  L.forEach(function(l,i){
+    toc.appendChild(el('a',{href:'#l'+i},'<b>'+(i+1)+'</b><span>'+l.t+'</span>'));
+    var s=el('section',{'class':'lesson',id:'l'+i},'<h2><b>'+(i+1)+'</b>'+l.t+'</h2><div class="one">'+l.one+'</div>'+l.html); main.appendChild(s); if(l.init) l.init(s);
+  });
+  $('#foot').textContent=T('Conexus · Plan de juego — guía interactiva. Las prácticas son simulaciones: no modifican tus datos.','Conexus · Piano di gioco — guida interattiva. Le pratiche sono simulazioni: non modificano i tuoi dati.');
+  spy();
+}
+function spy(){
+  var secs=$$('section.lesson'), links=$$('#toc a');
+  function on(){
+    var y=window.scrollY+120, ci=0; secs.forEach(function(s,i){if(s.offsetTop<=y) ci=i});
+    links.forEach(function(a,i){a.classList.toggle('act',i===ci)});
+    var max=document.documentElement.scrollHeight-innerHeight; $('#prog').style.width=(max>0?window.scrollY/max*100:0)+'%';
+  }
+  window.onscroll=on; on();
+}
+build();
+})();
+</script>
+</body>
+</html>
