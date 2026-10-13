@@ -72,6 +72,12 @@ body.cx-locked>header,body.cx-locked>main{display:none}
 rep('<script>\n(()=>{\nconst NS=','<script>\nwindow.__startApp=async()=>{\n'+'''{const K0='cx.'+CX.ws+'.plan'; if(!localStorage.getItem(K0)){
   const t=await (async()=>{try{const r=await fetch('data/'+CX.ws+'.json',{cache:'no-store'}); return r.ok?await r.text():null}catch(e){return null}})();
   if(t){try{JSON.parse(t); localStorage.setItem(K0,t)}catch(e){}} }}
+if(CX.share&&CX.cfg&&CX.cfg.key){ try{
+  const rs=await fetch(CX.cfg.url+'/rest/v1/rpc/cx_share_get',{method:'POST',headers:Object.assign({apikey:CX.cfg.key,'Content-Type':'application/json'},CX.cfg.key.indexOf('eyJ')===0?{Authorization:'Bearer '+CX.cfg.key}:{}),body:JSON.stringify({p_token:CX.share})});
+  const js=await rs.json();
+  if(!js.ok){ document.body.innerHTML='<div style="display:grid;place-items:center;height:100vh;color:#f1f5f9;font:16px Montserrat,system-ui,sans-serif;text-align:center;padding:24px">'+CX.tr('Este link no es válido o fue eliminado.')+'</div>'; return }
+  localStorage.setItem('cx.'+CX.ws+'.plan',JSON.stringify(js.data)); CX.wsName=js.name; const bg=document.getElementById('wsBadge'); if(bg) bg.textContent=js.name;
+}catch(e){CX.offline=true} }
 if(CX.cfg&&CX.cfg.key&&CX.hash){ try{
   const r0=await fetch(CX.cfg.url+'/rest/v1/rpc/cx_get',{method:'POST',headers:Object.assign({apikey:CX.cfg.key,'Content-Type':'application/json'},CX.cfg.key.indexOf('eyJ')===0?{Authorization:'Bearer '+CX.cfg.key}:{}),body:JSON.stringify({p_hash:CX.hash})});
   const j0=await r0.json();
@@ -139,7 +145,7 @@ function openVideo(url){
 
 /* ---------- nuevo inicio ---------- */''')
 rep("Object.entries(KINDS).forEach(([k,v])=>$('#nsKind').add(new Option(`${v.g}  ${v.n}`,k)));","Object.entries(KINDS).forEach(([k,v])=>$('#nsKind').add(new Option(`${v.g}  ${CX.tr(v.n)}`,k)));")
-tour=open(str(ROOT/'src'/'tour.js'),encoding='utf8').read()+'\n'+open(str(ROOT/'src'/'sync.js'),encoding='utf8').read()
+tour=open(str(ROOT/'src'/'tour.js'),encoding='utf8').read()+'\n'+open(str(ROOT/'src'/'sync.js'),encoding='utf8').read()+'\n'+open(str(ROOT/'src'/'share.js'),encoding='utf8').read()
 rep("lastSnap=JSON.stringify(data);\n$('#uUndo').onclick=undo;","lastSnap=JSON.stringify(data);\n$('#uUndo').onclick=undo;\n"+tour)
 # ---- modo solo lectura ----
 rep("function setView(v){\n  view=v;","function setView(v){\n  if(CX.role==='viewer'&&(v==='list'||v==='board')) v='map';\n  view=v;")

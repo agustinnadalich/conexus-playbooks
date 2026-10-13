@@ -101,5 +101,5 @@ function closeTour(){ti=-1; if(spot) spot.style.display='none'; if(card) card.re
 function startTour(){ti=-1; closeTour(); ti=0; ensureUI(); const s=ST[0]; render(); setTimeout(place,200)}
 window.addEventListener('resize',place); window.addEventListener('keydown',e=>{if(ti>=0&&e.key==='Escape') closeTour()});
 const tb=$('#tourBtn'); if(tb) tb.onclick=startTour;
-try{ if(!localStorage.getItem('cx.tour.'+CX.role)) setTimeout(startTour,1200) }catch(e){}
+try{ if(!CX.share&&!localStorage.getItem('cx.tour.'+CX.role)) setTimeout(startTour,1200) }catch(e){}
 })();

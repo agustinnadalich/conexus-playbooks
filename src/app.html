@@ -478,6 +478,15 @@ body.view-board .decinfo.show{display:block}
       <label class="field" id="fTypeWrap">Tipo de escena
         <select id="fType"><option value="decision">◇ Decisión (estática: se muestra sin animar)</option><option value="anim">▶ Animación (con línea de tiempo)</option></select>
       </label>
+      <div class="field" id="fZoomWrap">Encuadre de la cancha
+        <select id="fZoom"><option value="full">Cancha completa</option><option value="left">Zoom: touche izquierda (lineout)</option><option value="right">Zoom: touche derecha (lineout)</option><option value="custom">Zoom personalizado…</option></select>
+        <div id="fZoomCtl" style="display:none;margin-top:6px">
+          <label class="hint">Acercamiento <input type="range" id="fzW" min="20" max="77" step="1"></label>
+          <label class="hint">Posición horizontal <input type="range" id="fzX" min="-5" max="73" step="0.5"></label>
+          <label class="hint">Posición vertical <input type="range" id="fzY" min="28" max="63" step="0.5"></label>
+        </div>
+        <button id="fZoomAll" title="Copia este encuadre a todas las escenas de esta jugada (el inicio y todo lo que cuelga de él)" style="margin-top:6px">Aplicar a toda esta jugada</button>
+      </div>
       <div class="field" id="fNextWrap">Después de este paso
         <div id="fNextCombo"></div>
       </div>
@@ -1152,7 +1161,11 @@ function drawMarks(){
   }
   drawArrows();
 }
+const FRAMES={full:null,left:{x:-5,y:28,w:40},right:{x:33,y:28,w:40}};
+function frameOf(sc){const z=sc&&sc.zoom; if(!z||!(z.w<77)) return VB; const w=clamp(+z.w||78,16,78), h=w*VB.h/VB.w; return {x:clamp(+z.x||0,VB.x,VB.x+VB.w-w),y:clamp(+z.y||0,VB.y,VB.y+VB.h-h),w,h}}
+function applyFrame(){const f=frameOf(steps[cur]); $('#field').setAttribute('viewBox',f.x+' '+f.y+' '+f.w+' '+f.h)}
 function drawStatic(){
+  applyFrame();
   playT=clamp(playT,0,dur(cur));
   disp=stateAt(buildRig(cur),playT);
   draw(); drawMarks(); drawTrails(); updateUI(); updatePop(); renderKeys(); updTimeline();
@@ -1208,7 +1221,7 @@ function mapLayout(){
 }
 function thumb(s){
   const sv=document.createElementNS(NS,'svg');
-  sv.setAttribute('viewBox','-5 28 78 35');
+  {const f=frameOf(s); sv.setAttribute('viewBox',f.x+' '+f.y+' '+f.w+' '+f.h)}
   let h=`<rect x="-5" y="28" width="78" height="35" fill="#1e5136"/><rect x="-5" y="28" width="5" height="35" fill="#143524"/><rect x="70" y="28" width="3" height="35" fill="#143524"/>
     <g stroke="#fff" stroke-opacity=".5" stroke-width=".4"><line x1="0" y1="28" x2="0" y2="63"/><line x1="70" y1="28" x2="70" y2="63"/><line x1="5" y1="28" x2="5" y2="63" stroke-dasharray="1.5 1.5"/><line x1="15" y1="28" x2="15" y2="63" stroke-dasharray="1.5 1.5"/><line x1="55" y1="28" x2="55" y2="63" stroke-dasharray="1.5 1.5"/><line x1="65" y1="28" x2="65" y2="63" stroke-dasharray="1.5 1.5"/></g>`;
   s.marks.filter(m=>m.type==='ruck').forEach(m=>{h+=`<ellipse cx="${m.x}" cy="${m.y}" rx="3.4" ry="2.2" fill="rgba(255,255,255,.16)" stroke="#fff" stroke-width=".3" stroke-dasharray="1 .7"/>`});
@@ -1693,6 +1706,7 @@ function renderSide(){
   if(sideCur!==cur){
     sideCur=cur; const s=steps[cur];
     $('#fTitle').value=s.title; $('#fText').value=s.text; $('#fStatus').value=s.status||'';
+    {const z=steps[cur].zoom; $('#fZoom').value=!z||!(z.w<77)?'full':(z.w===40&&z.y===28&&z.x===-5?'left':(z.w===40&&z.y===28&&z.x===33?'right':'custom')); $('#fZoomCtl').style.display=$('#fZoom').value==='custom'?'block':'none'; if(z&&z.w<77){$('#fzW').value=z.w; $('#fzX').value=z.x; $('#fzY').value=z.y}}
     {const t=typeOf(cur); $('#fType').value=t==='decision'?'decision':'anim'; $('#fType').disabled=isRoot(cur); $('#fTypeWrap').style.display=isRoot(cur)?'none':''}
     const nb=$('#fNextCombo'); nb.innerHTML='';
     nb.appendChild(sceneCombo({value:typeof s.next==='string'?s.next:'',exclude:cur,noneLabel:'Fin (sin continuación)',onPick:id=>{s.next=id||null; save(); sideCur=-1; updateUI()}}));
@@ -2111,6 +2125,14 @@ document.addEventListener('keydown',e=>{
   if(e.key==='ArrowLeft') $('#bBack').click();
 });
 $('#fTitle').oninput=e=>{steps[cur].title=e.target.value; delete steps[cur].auto;save();updateCaptionOnly()};
+$('#fZoom').onchange=e=>{const v=e.target.value, sc=steps[cur];
+  if(v==='full') delete sc.zoom; else if(v==='custom'){sc.zoom=sc.zoom&&sc.zoom.w<77?sc.zoom:{x:0,y:30,w:36}} else sc.zoom=Object.assign({},FRAMES[v]);
+  save(); sideCur=-1; drawStatic(); renderMap()};
+const setZ=()=>{steps[cur].zoom={x:+$('#fzX').value,y:+$('#fzY').value,w:+$('#fzW').value}; save(); applyFrame(); draw(); drawMarks(); drawTrails(); renderMap&&0};
+['#fzW','#fzX','#fzY'].forEach(id=>{$(id).oninput=setZ; $(id).onchange=()=>{sideCur=-1; renderMap()}});
+$('#fZoomAll').onclick=()=>{const z=steps[cur].zoom, ids=[...(isRoot(cur)?subtreeIds(cur):subtreeIds(rootIdxOf(cur)))]; let n=0;
+  ids.forEach(id=>{const t=steps.find(x=>x.id===id); if(!t) return; if(z) t.zoom=Object.assign({},z); else delete t.zoom; n++});
+  save(); sideCur=-1; renderMap(); toast(n+' '+(z?'escenas con este encuadre.':'escenas con cancha completa.'))};
 $('#fStatus').onchange=e=>{setStatus(cur,e.target.value)};
 $('#fType').onchange=e=>{
   const sc=steps[cur], v=e.target.value;
@@ -2344,6 +2366,7 @@ function updClip(){
   $('#cInfo').textContent=clip?(clip.single?`Portapapeles: escena «${rt.title}».`:`Portapapeles: rama «${rt.title}» (${clip.steps.length} pasos).`):'Portapapeles vacío.';
   $('#cPaste').disabled=$('#cReplace').disabled=!clip;
 }
+function rootIdxOf(i){const id=steps[i].id; for(const st of data.starts){const r=idxOf(st.root); if(r>=0&&subtreeIds(r).has(id)) return r} return i}
 function subtreeIds(i){
   const seen=new Set(), st=[i];
   while(st.length){const k=st.pop(), id=steps[k].id; if(seen.has(id)) continue; seen.add(id); kidsOf(k).forEach(x=>{ if(!isRoot(x.i)) st.push(x.i) })}

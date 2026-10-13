@@ -23,7 +23,7 @@
     it:'<svg viewBox="0 0 30 20" width="26" height="17" aria-hidden="true"><rect width="10" height="20" fill="#009246"/><rect x="10" width="10" height="20" fill="#fff"/><rect x="20" width="10" height="20" fill="#ce2b37"/></svg>'
   };
   /* ---------- idioma ---------- */
-  var L=localStorage.getItem('cx.lang');
+  var L=(new URLSearchParams(location.search)).get('lang')||localStorage.getItem('cx.lang');
   if(L!=='es'&&L!=='it') L=(navigator.language||'es').toLowerCase().indexOf('it')===0?'it':'es';
   var EX=new Map(), RULES=[], cache=new Map();
   var IT_EXACT=@@IT_EXACT@@;
@@ -59,7 +59,8 @@
     if(SKIP[n.tagName]) return;
     for(var c=n.firstChild;c;c=c.nextSibling) trNode(c);
   }
-  var CX=window.CX={cfg:@@CFG@@,hash:null,flag:FLAG,ws:null,wsName:'',role:'viewer',lang:L,tr:tr,
+  var SHARE=(new URLSearchParams(location.search)).get('s');
+  var CX=window.CX={share:SHARE||null,cfg:@@CFG@@,hash:null,flag:FLAG,ws:null,wsName:'',role:'viewer',lang:L,tr:tr,
     setLang:function(l){localStorage.setItem('cx.lang',l); location.reload()},
     logout:function(){['cx.ws','cx.role','cx.h'].forEach(function(k){sessionStorage.removeItem(k); localStorage.removeItem(k)}); location.reload()},
     workspaces:WORKSPACES};
@@ -119,6 +120,7 @@
   function start(ws,role,hash){ CX.hash=hash||null;
     CX.ws=ws.id; CX.wsName=ws.name; CX.role=role==='editor'?'editor':'viewer';
     if(CX.role==='viewer') document.documentElement.classList.add('cx-viewer');
+    if(CX.share) document.documentElement.classList.add('cx-share');
     var gate=document.getElementById('cxLogin'); if(gate) gate.remove();
     document.body.classList.remove('cx-locked');
     var badge=document.getElementById('wsBadge'); if(badge){badge.textContent=ws.name+' · '+tr(CX.role==='editor'?'✎ Edición':'👁 Solo lectura')}
@@ -155,6 +157,7 @@
   }
   function boot(){
     if(L==='it') trNode(document.body);
+    if(SHARE){ start({id:'share_'+SHARE.slice(0,12),name:'…'},'viewer',null); return }
     var id=sessionStorage.getItem('cx.ws')||localStorage.getItem('cx.ws'), role=sessionStorage.getItem('cx.role')||localStorage.getItem('cx.role');
     var hh=sessionStorage.getItem('cx.h')||localStorage.getItem('cx.h');
     if(id&&WORKSPACES[id]&&(role==='viewer'||role==='editor')&&hh) start(WORKSPACES[id],role,hh); else showLogin();
