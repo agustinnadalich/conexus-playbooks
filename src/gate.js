@@ -60,7 +60,8 @@
     for(var c=n.firstChild;c;c=c.nextSibling) trNode(c);
   }
   var SHARE=(new URLSearchParams(location.search)).get('s');
-  var CX=window.CX={share:SHARE||null,cfg:@@CFG@@,hash:null,flag:FLAG,ws:null,wsName:'',role:'viewer',lang:L,tr:tr,
+  var LOCALDEV=/^(localhost|127\.0\.0\.1)$/.test(location.hostname)&&(new URLSearchParams(location.search)).get('cloud')==='0';
+  var CX=window.CX={share:SHARE||null,cfg:LOCALDEV?null:@@CFG@@,localDev:LOCALDEV,hash:null,flag:FLAG,ws:null,wsName:'',role:'viewer',lang:L,tr:tr,
     setLang:function(l){localStorage.setItem('cx.lang',l); location.reload()},
     logout:function(){['cx.ws','cx.role','cx.h'].forEach(function(k){sessionStorage.removeItem(k); localStorage.removeItem(k)}); location.reload()},
     workspaces:WORKSPACES};
@@ -123,7 +124,7 @@
     if(CX.share) document.documentElement.classList.add('cx-share');
     var gate=document.getElementById('cxLogin'); if(gate) gate.remove();
     document.body.classList.remove('cx-locked');
-    var badge=document.getElementById('wsBadge'); if(badge){badge.textContent=ws.name+' · '+tr(CX.role==='editor'?'✎ Edición':'👁 Solo lectura')}
+    var badge=document.getElementById('wsBadge'); if(badge){badge.textContent=ws.name+' · '+tr(CX.role==='editor'?'✎ Edición':'👁 Solo lectura')+(CX.localDev?' · 🧪 LOCAL (sin nube)':'')}
     if(window.__startApp) window.__startApp();
   }
   function showLogin(){
