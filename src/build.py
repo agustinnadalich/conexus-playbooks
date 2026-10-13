@@ -36,6 +36,9 @@ rep('</style>','''
 #cxLogin .lg button.on{background:#252f47;color:inherit}
 #cxLogin input[type=password]{color:#f1f5f9}
 html.cx-viewer body.view-map .side{display:none}
+html.cx-nosteps #presCard{display:none}
+html.cx-nosteps body.view-pres .side{display:none}
+html.cx-nosteps body.view-pres .app{grid-template-columns:minmax(0,1fr);max-width:900px}
 html.cx-share #vMap,html.cx-share #vList,html.cx-share #vBoard,html.cx-share #vPres{display:none!important}
 html.cx-viewer body.view-map .app{grid-template-columns:minmax(0,1fr)}
 html.cx-viewer #vList,html.cx-viewer #vBoard,html.cx-viewer #uUndo,html.cx-viewer #uRedo,html.cx-viewer #mAuto,html.cx-viewer .mnode .addh,html.cx-viewer .mnode .open,html.cx-viewer .mghost button,html.cx-viewer #tOpen,html.cx-viewer #jsonBtn,html.cx-viewer .startpanel,html.cx-viewer .wsedit{display:none!important}
