@@ -313,6 +313,52 @@ body.view-board .decinfo.show{display:block}
 .altrow{display:grid;grid-template-columns:28px 1fr 26px;gap:6px;margin-bottom:6px;align-items:center}
 .altrow input[type=color]{width:28px;height:28px;padding:0;border:none;background:none;cursor:pointer}
 .altrow button{padding:0;height:26px}
+/* ===== Responsive: tablet y celular ===== */
+@media (max-width:1000px){
+  body.view-pres .app,body.view-list .app,body.view-board .app,body.view-map .app{grid-template-columns:minmax(0,1fr)}
+  .side{position:static;max-height:none;overflow:visible}
+  #presList{max-height:none}
+}
+@media (max-width:760px){
+  .top{position:static;padding:8px 10px;gap:8px}
+  .brand img{width:28px;height:28px}.brand span{display:none}.brand b{font-size:14px}
+  .tabs{margin-left:0;order:3;width:100%}.tabs button{flex:1;padding:9px 6px;font-size:13px}
+  .tools{margin-left:auto;flex:1;flex-wrap:wrap;gap:6px;justify-content:flex-end}
+  .tools select{min-width:0;max-width:46vw}
+  .tools button,.tools .btnlink{padding:6px 8px;font-size:12px}
+  .app{padding:8px 8px 28px;gap:10px}
+  body.view-pres .fieldwrap{position:sticky;top:0;z-index:15;box-shadow:0 6px 14px rgba(0,0,0,.45)}
+  .caption{padding:12px;margin-top:8px}
+  .caption h2{font-size:18px}
+  .opts button{min-height:48px;padding:10px 12px}
+  .bar{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .bar button{min-height:44px}
+  .bar #bBack{grid-column:1}.bar #bNext{grid-column:2}
+  .bar label{grid-column:1/-1}
+  html.cx-viewer .bar label:has(#eqSpeed){display:none}
+  .side .card{padding:12px}
+  .btools{flex-wrap:wrap}
+  .pn{padding:9px 6px;font-size:14px}
+  .modal .box{width:94vw;max-width:94vw}
+  .tl-top{flex-wrap:wrap}
+  .tl-tools{flex-wrap:wrap}
+  .tl-tools button{min-height:38px}
+  .maptools{flex-wrap:wrap}.maptools .hint{display:none}
+  #mapVp{height:calc(100vh - 230px);min-height:360px}
+  .ltools,.lbulk{flex-wrap:wrap}
+  .lhead{display:none}
+  .lrow{grid-template-columns:24px 92px minmax(0,1fr);gap:4px 10px;padding:10px 8px}
+  .lrow>:nth-child(1){grid-column:1;grid-row:1}
+  .lrow>:nth-child(2){grid-column:2;grid-row:1/5}
+  .lrow>:nth-child(3){grid-column:3;grid-row:1}
+  .lrow>:nth-child(4){grid-column:3;grid-row:2}
+  .lrow>:nth-child(5){grid-column:3;grid-row:3}
+  .lrow>:nth-child(6){display:none}
+  .lrow>:nth-child(7){grid-column:3;grid-row:4}
+  .lrow>:nth-child(8){grid-column:1/-1;grid-row:5}
+  .lrow>:nth-child(9){grid-column:1/-1;grid-row:6;flex-wrap:wrap}
+  .lrow .acts button{min-height:36px}
+}
 
 .wsb{font-weight:700;font-size:12px;color:var(--pri);border:1px solid var(--pri);border-radius:99px;padding:2px 10px;margin-right:6px;white-space:nowrap}
 .tools .flags{display:inline-flex;gap:4px}
@@ -332,8 +378,9 @@ html.cx-viewer #vList,html.cx-viewer #vBoard,html.cx-viewer #uUndo,html.cx-viewe
 #tourCard .tf{display:flex;gap:8px;align-items:center;margin-top:12px;border-top:1px solid #323c52;padding-top:10px}
 #tourCard .sp{flex:1}#tourCard .tn{font-size:12px;color:#b3bdcc}
 .modal.cxconf{z-index:950}
-#syncBar{position:fixed;left:12px;bottom:12px;z-index:60;background:#1d2435;border:1px solid #323c52;border-radius:999px;padding:4px 12px;font-size:12px;color:#b3bdcc;box-shadow:0 6px 18px rgba(0,0,0,.4)}
+#syncBar{position:fixed;left:8px;bottom:8px;max-width:calc(100vw - 16px);z-index:60;background:#1d2435;border:1px solid #323c52;border-radius:999px;padding:4px 12px;font-size:12px;color:#b3bdcc;box-shadow:0 6px 18px rgba(0,0,0,.4)}
 #presWarn{position:fixed;left:50%;transform:translateX(-50%);top:62px;z-index:70;background:#3b1d22;border:1px solid #e7555f;color:#fecaca;border-radius:12px;padding:8px 14px;font-size:13px;display:none;max-width:90vw}
+.wsb{max-width:56vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .wsb{font-size:12px;color:#b3bdcc;border:1px solid #323c52;border-radius:999px;padding:3px 10px;white-space:nowrap}
 .btnlink{display:inline-block;text-decoration:none;color:var(--fg);background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:6px 11px;font-size:13px;white-space:nowrap}
 .btnlink:hover{border-color:var(--pri)}
@@ -1566,12 +1613,17 @@ function zoomAt(f,cx0,cy0){
   mapSt.x=cx-(cx-mapSt.x)*r; mapSt.y=cy-(cy-mapSt.y)*r; mapSt.k=k; applyMap();
 }
 (()=>{
-  const vp=$('#mapVp'); let pan=null;
+  const vp=$('#mapVp'); let pan=null, pinch=null; const tp=new Map();
+  vp.addEventListener('pointerdown',e=>{ if(e.pointerType!=='touch') return; tp.set(e.pointerId,[e.clientX,e.clientY]); if(tp.size===2){pan=null; vp.classList.remove('pan'); const [a,b]=[...tp.values()]; pinch={d:Math.hypot(a[0]-b[0],a[1]-b[1])||1,k:mapSt.k}} },true);
+  vp.addEventListener('pointermove',e=>{ if(!tp.has(e.pointerId)) return; tp.set(e.pointerId,[e.clientX,e.clientY]); if(pinch&&tp.size===2){const [a,b]=[...tp.values()], d=Math.hypot(a[0]-b[0],a[1]-b[1]), r=vp.getBoundingClientRect(); zoomAt((pinch.k*d/pinch.d)/mapSt.k,(a[0]+b[0])/2-r.left,(a[1]+b[1])/2-r.top)} },true);
+  const endTp=e=>{tp.delete(e.pointerId); if(tp.size<2) pinch=null};
+  vp.addEventListener('pointerup',endTp,true); vp.addEventListener('pointercancel',endTp,true);
   vp.addEventListener('pointerdown',e=>{
+    if(pinch) return;
     if(e.target.closest('.mnode,.mstart,.epill,.mghost,.nmenu,.addh')) return;
     pan={x:e.clientX,y:e.clientY,sx:mapSt.x,sy:mapSt.y}; vp.classList.add('pan'); vp.setPointerCapture(e.pointerId);
   });
-  vp.addEventListener('pointermove',e=>{if(!pan) return; mapSt.x=pan.sx+e.clientX-pan.x; mapSt.y=pan.sy+e.clientY-pan.y; applyMap()});
+  vp.addEventListener('pointermove',e=>{if(!pan||pinch) return; mapSt.x=pan.sx+e.clientX-pan.x; mapSt.y=pan.sy+e.clientY-pan.y; applyMap()});
   const end=()=>{pan=null;vp.classList.remove('pan')};
   vp.addEventListener('pointerup',end); vp.addEventListener('pointercancel',end);
   vp.addEventListener('wheel',e=>{

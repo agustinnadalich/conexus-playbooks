@@ -47,8 +47,9 @@ html.cx-viewer #vList,html.cx-viewer #vBoard,html.cx-viewer #uUndo,html.cx-viewe
 #tourCard .tf{display:flex;gap:8px;align-items:center;margin-top:12px;border-top:1px solid #323c52;padding-top:10px}
 #tourCard .sp{flex:1}#tourCard .tn{font-size:12px;color:#b3bdcc}
 .modal.cxconf{z-index:950}
-#syncBar{position:fixed;left:12px;bottom:12px;z-index:60;background:#1d2435;border:1px solid #323c52;border-radius:999px;padding:4px 12px;font-size:12px;color:#b3bdcc;box-shadow:0 6px 18px rgba(0,0,0,.4)}
+#syncBar{position:fixed;left:8px;bottom:8px;max-width:calc(100vw - 16px);z-index:60;background:#1d2435;border:1px solid #323c52;border-radius:999px;padding:4px 12px;font-size:12px;color:#b3bdcc;box-shadow:0 6px 18px rgba(0,0,0,.4)}
 #presWarn{position:fixed;left:50%;transform:translateX(-50%);top:62px;z-index:70;background:#3b1d22;border:1px solid #e7555f;color:#fecaca;border-radius:12px;padding:8px 14px;font-size:13px;display:none;max-width:90vw}
+.wsb{max-width:56vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .wsb{font-size:12px;color:#b3bdcc;border:1px solid #323c52;border-radius:999px;padding:3px 10px;white-space:nowrap}
 .btnlink{display:inline-block;text-decoration:none;color:var(--fg);background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:6px 11px;font-size:13px;white-space:nowrap}
 .btnlink:hover{border-color:var(--pri)}
