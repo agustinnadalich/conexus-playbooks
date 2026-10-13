@@ -36,6 +36,7 @@ rep('</style>','''
 #cxLogin .lg button.on{background:#252f47;color:inherit}
 #cxLogin input[type=password]{color:#f1f5f9}
 html.cx-viewer body.view-map .side{display:none}
+html.cx-share #vMap,html.cx-share #vList,html.cx-share #vBoard,html.cx-share #vPres{display:none!important}
 html.cx-viewer body.view-map .app{grid-template-columns:minmax(0,1fr)}
 html.cx-viewer #vList,html.cx-viewer #vBoard,html.cx-viewer #uUndo,html.cx-viewer #uRedo,html.cx-viewer #mAuto,html.cx-viewer .mnode .addh,html.cx-viewer .mnode .open,html.cx-viewer .mghost button,html.cx-viewer #tOpen,html.cx-viewer #jsonBtn,html.cx-viewer .startpanel,html.cx-viewer .wsedit{display:none!important}
 .primary{background:#4fd1e5;color:#072029;border-color:#4fd1e5;font-weight:700}
@@ -148,7 +149,7 @@ rep("Object.entries(KINDS).forEach(([k,v])=>$('#nsKind').add(new Option(`${v.g} 
 tour=open(str(ROOT/'src'/'tour.js'),encoding='utf8').read()+'\n'+open(str(ROOT/'src'/'sync.js'),encoding='utf8').read()+'\n'+open(str(ROOT/'src'/'share.js'),encoding='utf8').read()
 rep("lastSnap=JSON.stringify(data);\n$('#uUndo').onclick=undo;","lastSnap=JSON.stringify(data);\n$('#uUndo').onclick=undo;\n"+tour)
 # ---- modo solo lectura ----
-rep("function setView(v){\n  view=v;","function setView(v){\n  if(CX.role==='viewer'&&(v==='list'||v==='board')) v='map';\n  view=v;")
+rep("function setView(v){\n  view=v;","function setView(v){\n  if(CX.share) v='pres'; else if(CX.role==='viewer'&&(v==='list'||v==='board')) v='map';\n  view=v;")
 rep("function openBoard(i){history=[]; if(i!==undefined&&i>=0){cur=i} playT=dur(cur); setView('board')}","function openBoard(i){history=[]; if(i!==undefined&&i>=0){cur=i} playT=dur(cur); setView(CX.role==='viewer'?'pres':'board')}")
 rep("    if(e.button!==0||e.target.closest('button,input')) return;\n    let kind=null, ps=null;","    if(CX.role==='viewer'||e.button!==0||e.target.closest('button,input')) return;\n    let kind=null, ps=null;")
 rep("d.oncontextmenu=e=>{e.preventDefault();","d.oncontextmenu=e=>{e.preventDefault(); if(CX.role==='viewer') return;")
