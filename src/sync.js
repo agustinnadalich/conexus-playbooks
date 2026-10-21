@@ -22,7 +22,7 @@ function applyRemote(d,v){
   try{
     const curId=steps[cur]&&steps[cur].id;
     data=normalize(JSON.parse(JSON.stringify(d))); steps=data.steps; migrateLegacy(); undoStack=[]; redoStack=[]; history=[];
-    mapDir=data.mapDir==='v'?'v':'h'; if($('#kHoldAuto')) $('#kHoldAuto').checked=!!data.holdEnd;
+    mapDir=data.mapDir==='v'?'v':'h'; if($('#kHoldAuto')) $('#kHoldAuto').checked=data.holdEnd!==false;
     save(); mapFitted=false; const ix=idxOf(curId); goDirect(ix>=0?ix:Math.max(0,idxOf(data.starts[0].root))); setView(view);
     rv=v; dirty=false; pendingRemote=null; base=JSON.stringify(data);
   }finally{applying=false}

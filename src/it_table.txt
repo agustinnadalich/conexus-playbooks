@@ -541,3 +541,4 @@ Quita los defensores elegidos; si no hay ninguno elegido, quita toda la defensa 
 ¿Cuántos defensores en línea? (1 a 15) ⟫ Quanti difensori in linea? (da 1 a 15)
 ¿Quitar TODA la defensa de esta escena y de las siguientes de la rama? ⟫ Rimuovere TUTTA la difesa di questa scena e delle successive del ramo?
 Esta escena no tiene defensores. ⟫ Questa scena non ha difensori.
+Activado (recomendado): cada jugador que movés en un instante intermedio se queda ahí hasta el final, salvo que vos fijes su posición final o agregues un fotograma posterior. ⟫ Attivato (consigliato): ogni giocatore che sposti in un istante intermedio resta lì fino alla fine, a meno che tu non fissi la sua posizione finale o aggiunga un fotogramma successivo.

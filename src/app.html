@@ -454,7 +454,7 @@ body.view-board .decinfo.show{display:block}
         <div class="tl-tools">
           <button id="kSet" title="Fija en este instante la posición de los jugadores elegidos (o de todos si no hay selección)">◆ Fijar fotograma</button>
           <button id="kHold" title="Los jugadores elegidos (o todos) se quedan quietos desde este instante hasta el final del paso: su posición final pasa a ser la de ahora y se quitan sus fotogramas posteriores. En el instante 0 quedan totalmente quietos.">⏸ Mantener hasta el final</button>
-          <label class="hint" style="display:inline-flex;gap:4px;align-items:center" title="Si está activo, cada vez que movés un jugador en un instante intermedio, se queda ahí hasta el final (no vuelve a su posición final anterior)."><input type="checkbox" id="kHoldAuto"> mantener tras el último fotograma</label>
+          <label class="hint" style="display:inline-flex;gap:4px;align-items:center" title="Activado (recomendado): cada jugador que movés en un instante intermedio se queda ahí hasta el final, salvo que vos fijes su posición final o agregues un fotograma posterior."><input type="checkbox" id="kHoldAuto" checked> mantener tras el último fotograma</label>
           <button id="kDel" title="Quita los fotogramas intermedios de este instante">✕ Quitar</button>
           <button id="kCopy" title="Copia las posiciones de este instante">⎘ Copiar fotograma</button>
           <button id="kPaste" title="Pega las posiciones copiadas en este instante">⎗ Pegar fotograma</button>
@@ -776,7 +776,7 @@ function restore(json){
   const curId=steps[cur]&&steps[cur].id;
   data=JSON.parse(json); steps=data.steps; cur=Math.max(0,idxOf(curId));
   sel.clear(); selWp=null; selText=null; sideCur=-1; animToken++; animating=false; lastPush=0;
-  mapDir=data.mapDir==='v'?'v':'h'; if($('#kHoldAuto')) $('#kHoldAuto').checked=!!data.holdEnd; $('#eqSpeed').checked=data.eqSpeed!==false;
+  mapDir=data.mapDir==='v'?'v':'h'; if($('#kHoldAuto')) $('#kHoldAuto').checked=data.holdEnd!==false; $('#eqSpeed').checked=data.eqSpeed!==false;
   playT=Math.min(playT,dur(cur)); lastSnap=json;
   try{localStorage.setItem(KEY,json)}catch(e){}
   drawStatic(); updUndoUI();
@@ -1104,7 +1104,12 @@ function setKey(s,id,t,x,y){
   const arr=s.tracks[id]=s.tracks[id]||[], j=arr.findIndex(k=>Math.abs(k[0]-t)<.04);
   if(j>=0){arr[j][1]=x; arr[j][2]=y}
   else{arr.push([r2(t),x,y]); arr.sort((a,b)=>a[0]-b[0])}
-  if(data.holdEnd&&arr[arr.length-1][0]<=t+.04&&s.players[id]) s.players[id]=[x,y]; // «mantener»: tras el último fotograma se queda ahí
+  // por defecto el jugador se queda donde lo dejás hasta el final, salvo que fijes vos el fotograma final (o agregues uno posterior)
+  if(data.holdEnd!==false&&s.players[id]&&arr[arr.length-1][0]<=t+.04){
+    s.endAuto=s.endAuto||{}; s.endSet=s.endSet||{};
+    const en=s.players[id], st=(s.start&&s.start.p&&s.start.p[id])||startOf(steps.indexOf(s)).p[id]||en;
+    if(!s.endSet[id]&&(s.endAuto[id]||Math.hypot(en[0]-st[0],en[1]-st[1])<.3)){ s.players[id]=[x,y]; s.endAuto[id]=true }
+  }
 }
 function setBKey(s,t,rec){
   const D=dur(steps.indexOf(s)); t=clamp(t,.05,D-.05);
@@ -2085,7 +2090,7 @@ svg.addEventListener('pointermove',e=>{
   if(drag.kind==='pl'){
     if(drag.locked){tmsg('El fotograma 0 es el final del paso anterior. Movete en la línea de tiempo para editar un instante intermedio.'); return}
     if(drag.atEnd){
-      for(const k in drag.start) s.players[k]=[r1(cx(drag.start[k][0]+dx)),r1(cy(drag.start[k][1]+dy))];
+      for(const k in drag.start){ s.players[k]=[r1(cx(drag.start[k][0]+dx)),r1(cy(drag.start[k][1]+dy))]; s.endSet=s.endSet||{}; s.endSet[k]=true; if(s.endAuto) delete s.endAuto[k] }
       disp=stateAt(buildRig(cur),playT); draw(); drawTrails();
     }else if(drag.atStart){
       ensureStart(s,cur);
@@ -2336,7 +2341,7 @@ $('#kSet').onclick=()=>{
 $('#kHold').onclick=()=>{
   const s=steps[cur], rig=buildRig(cur), st=stateAt(rig,playT), D=dur(cur);
   targetIds().forEach(id=>{
-    s.players[id]=[r1(st.p[id][0]),r1(st.p[id][1])];
+    s.players[id]=[r1(st.p[id][0]),r1(st.p[id][1])]; s.endAuto=s.endAuto||{}; s.endAuto[id]=true; if(s.endSet) delete s.endSet[id];
     const a=s.tracks[id]; if(a){s.tracks[id]=a.filter(k=>k[0]<=playT+.04); if(!s.tracks[id].length) delete s.tracks[id]}
   });
   save(); drawStatic(); kmsg(playT<=.05?'Quedan quietos todo el paso.':'Quedan quietos desde '+playT.toFixed(1)+' s hasta el final.');
@@ -2361,7 +2366,7 @@ $('#kPaste').onclick=()=>{
   const ids=targetIds();
   if(playT<=.05){ensureStart(s,cur); ids.forEach(id=>{s.start.p[id]=frameClip.p[id].slice()}); if(!sel.size) s.start.ball={holder:frameClip.ball.holder||null,x:frameClip.ball.x||0,y:frameClip.ball.y||0}; save(); drawStatic(); return}
   if(playT>=D-.05){
-    ids.forEach(id=>{s.players[id]=frameClip.p[id].slice()});
+    ids.forEach(id=>{s.players[id]=frameClip.p[id].slice(); s.endSet=s.endSet||{}; s.endSet[id]=true; if(s.endAuto) delete s.endAuto[id]});
     if(!sel.size) s.ball=frameClip.ball.holder?{holder:frameClip.ball.holder,x:0,y:0}:{holder:null,x:frameClip.ball.x,y:frameClip.ball.y};
   }else{
     ids.forEach(id=>setKey(s,id,playT,frameClip.p[id][0],frameClip.p[id][1]));
@@ -2389,7 +2394,7 @@ function attachBranch(i,toId){
   else{c.options=[mkOpt(optName(0),toId,0)]; delete c.next}
 }
 function blankFrom(c,title){
-  const n=clone(c); n.id=newId(); n.title=title; n.text=''; n.options=[]; n.paths={}; n.delays={}; n.speeds={}; n.tracks={}; n.bkeys=[]; n.start=snapshotEnd(c); n.highlight=[]; n.next=null; n.marks=(n.marks||[]).filter(m=>m.type==='ruck'); delete n.status; delete n.draft; n.draft=sceneSig(n); return n;
+  const n=clone(c); n.id=newId(); n.title=title; n.text=''; n.options=[]; n.paths={}; n.delays={}; n.speeds={}; n.tracks={}; n.bkeys=[]; n.start=snapshotEnd(c); delete n.endSet; delete n.endAuto; n.highlight=[]; n.next=null; n.marks=(n.marks||[]).filter(m=>m.type==='ruck'); delete n.status; delete n.draft; n.draft=sceneSig(n); return n;
 }
 function afterEdit(goId){save(); history=[]; sideCur=-1; goDirect(Math.max(0,idxOf(goId))); if(view==='map') ensureVisible()}
 function insertNext(i){

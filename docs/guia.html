@@ -170,17 +170,17 @@ function lessonMap(host){
 function lessonAnim(host,mode){
   var D=3, P=[{id:9},{id:10},{id:12},{id:13},{id:15},{id:8,fwd:true}];
   var S={9:[48,38],10:[56,32],12:[65,26],13:[74,22],15:[50,48],8:[40,34]}, E={9:[44,26],10:[58,14],12:[72,10],13:[86,12],15:[44,40],8:[34,20]};
-  var keys={}, st={t:0,sel:null,hold:false,played:false,heldUsed:false,keyMade:false,autoOK:false,playing:false};
+  var keys={}, st={t:0,sel:null,hold:true,played:false,heldUsed:false,keyMade:false,autoOK:false,playing:false};
   host.innerHTML='<div class="sand"><div class="cap"><span>'+T('Mini-tablero de práctica','Mini-lavagna di pratica')+'</span><span id="tm">0.0 / 3.0 s</span></div><div id="fw"></div>'+
    '<div class="tl"><button id="pl" class="pri">▶</button><div class="tlbar" id="tb"><input type="range" id="sl" min="0" max="3" step="0.05" value="0"></div></div>'+
    '<div class="tools"><button id="kset" title="'+T('Fija en este instante la posición de los jugadores elegidos (o de todos)','Fissa in questo istante la posizione dei giocatori scelti (o di tutti)')+'">◆ '+T('Fijar fotograma','Fissa fotogramma')+'</button>'+
-   (mode==='hold'?'<button id="khold" class="pri">⏸ '+T('Mantener hasta el final','Mantieni fino alla fine')+'</button><label><input type="checkbox" id="kauto"> '+T('mantener tras el último fotograma','mantieni dopo l\'ultimo fotogramma')+'</label>':'')+
+   (mode==='hold'?'<button id="khold" class="pri">⏸ '+T('Mantener hasta el final','Mantieni fino alla fine')+'</button><label><input type="checkbox" id="kauto" checked> '+T('mantener tras el último fotograma','mantieni dopo l\'ultimo fotogramma')+'</label>':'')+
    '<button id="rs">⟲ '+T('Reiniciar práctica','Riavvia pratica')+'</button></div><div class="hintline" id="hl"></div><ul class="tasks" id="tk"></ul></div>';
   var fw=$('#fw',host), svg=makeField(); fw.appendChild(svg);
   var trails=sv('g',{}); svg.appendChild(trails); var gp={}; P.forEach(function(p){gp[p.id]=player(svg,p)}); var bl=ball(svg);
   var sl=$('#sl',host), hl=$('#hl',host);
   function msg(t){hl.textContent=t}
-  function reset(){keys={}; P.forEach(function(p){keys[p.id]=[[0,S[p.id][0],S[p.id][1]],[D,E[p.id][0],E[p.id][1]]]}); st.t=0; st.sel=null; st.played=false; st.heldUsed=false; st.keyMade=false; st.autoOK=false; sl.value=0; if($('#kauto',host)) $('#kauto',host).checked=false; st.hold=false; refresh(); msg('')}
+  function reset(){keys={}; P.forEach(function(p){keys[p.id]=[[0,S[p.id][0],S[p.id][1]],[D,E[p.id][0],E[p.id][1]]]}); st.t=0; st.sel=null; st.played=false; st.heldUsed=false; st.keyMade=false; st.autoOK=false; sl.value=0; if($('#kauto',host)) $('#kauto',host).checked=true; st.hold=true; refresh(); msg('')}
   function pos(id,t){var a=keys[id]; for(var i=0;i<a.length-1;i++){if(t<=a[i+1][0]+1e-9){var span=a[i+1][0]-a[i][0], u=span<1e-6?1:(t-a[i][0])/span; u=u*u*(3-2*u); return [a[i][1]+(a[i+1][1]-a[i][1])*u,a[i][2]+(a[i+1][2]-a[i][2])*u]}} var l=a[a.length-1]; return [l[1],l[2]]}
   function refresh(){
     trails.innerHTML='';
@@ -241,7 +241,7 @@ function lessonAnim(host,mode){
     var L=mode==='hold'?[
       [st.played,T('Apretá ▶ y mirá: todos se desplazan hacia su posición final (el “problema”).','Premi ▶ e guarda: tutti si spostano verso la posizione finale (il “problema”).')],
       [st.heldUsed,T('Poné la barra en 0 s y apretá «⏸ Mantener hasta el final»: ahora todos quedan quietos.','Metti la barra a 0 s e premi «⏸ Mantieni fino alla fine»: ora restano tutti fermi.')],
-      [st.autoOK,T('Activá «mantener tras el último fotograma», poné la barra en 1,5 s y arrastrá al 10: se queda ahí hasta el final.','Attiva «mantieni dopo l\'ultimo fotogramma», metti la barra a 1,5 s e trascina il 10: resta lì fino alla fine.')]
+      [st.autoOK,T('Con «mantener tras el último fotograma» activado (viene así por defecto), poné la barra en 1,5 s y arrastrá al 10: se queda ahí hasta el final.','Con «mantieni dopo l\'ultimo fotogramma» attivo (è il predefinito), metti la barra a 1,5 s e trascina il 10: resta lì fino alla fine.')]
     ]:[
       [st.played,T('Apretá ▶ y mirá cómo van del inicio al final.','Premi ▶ e guarda come vanno dall\'inizio alla fine.')],
       [st.keyMade,T('Poné la barra en 1,5 s y arrastrá al 12 a otro lugar: aparece un ◆ (fotograma).','Metti la barra a 1,5 s e trascina il 12 altrove: compare un ◆ (fotogramma).')]
