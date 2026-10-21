@@ -532,3 +532,12 @@ Arrastrá para moverte · Ctrl + rueda: zoom · doble clic en un paso: abrirlo �
 ↺ Orden automático ⟫ ↺ Ordine automatico
 🎓 Tutorial ⟫ 🎓 Tutorial
 Tutorial interactivo paso a paso ⟫ Tutorial interattivo passo passo
+＋ Defensor ⟫ ＋ Difensore
+🛡 Línea defensiva… ⟫ 🛡 Linea difensiva…
+− Quitar defensor ⟫ − Rimuovi difensore
+Agrega un defensor (rojo). Se mueve y se anima igual que tus jugadores y aparece en esta escena y en las siguientes de la rama. ⟫ Aggiunge un difensore (rosso). Si muove e si anima come i tuoi giocatori e compare in questa scena e in quelle successive del ramo.
+Agrega varios defensores en línea ⟫ Aggiunge più difensori in linea
+Quita los defensores elegidos; si no hay ninguno elegido, quita toda la defensa de esta escena y las siguientes ⟫ Rimuove i difensori scelti; se non ce n'è nessuno, rimuove tutta la difesa di questa scena e delle successive
+¿Cuántos defensores en línea? (1 a 15) ⟫ Quanti difensori in linea? (da 1 a 15)
+¿Quitar TODA la defensa de esta escena y de las siguientes de la rama? ⟫ Rimuovere TUTTA la difesa di questa scena e delle successive del ramo?
+Esta escena no tiene defensores. ⟫ Questa scena non ha difensori.

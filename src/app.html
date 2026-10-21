@@ -20,7 +20,7 @@ button{background:var(--card2);border:1px solid var(--line);border-radius:10px;p
 button:hover:not(:disabled){border-color:var(--pri)}
 button:disabled{opacity:.4;cursor:default}
 button.primary{background:var(--pri);color:var(--pri-ink);border-color:var(--pri);font-weight:600}
-input[type=text],input[type=url],input[type=password],input[type=search],input:not([type]),textarea,select{background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:7px 10px;color:var(--fg);width:100%}
+input[type=text],input[type=url],input[type=password],input[type=search],input[type=number],input:not([type]),textarea,select{background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:7px 10px;color:var(--fg);width:100%}
 input:focus,textarea:focus,select:focus,button:focus-visible{outline:2px solid rgba(79,209,229,.45);outline-offset:1px}
 option{background:var(--card)}
 
@@ -412,6 +412,9 @@ body.view-board .decinfo.show{display:block}
         <button id="mAddRuck" title="Agregar la marca de ruck">◉ Ruck</button>
         <button id="altAdd" title="Dibuja dos o más flechas de opción (Op1, Op2…) para un jugador que puede leer y elegir. Primero elegí al jugador.">↗ Opciones del jugador</button>
         <button id="hlSel" title="Resaltar con un aro amarillo a los jugadores elegidos">★ Resaltar</button>
+        <button id="defAdd" title="Agrega un defensor (rojo). Se mueve y se anima igual que tus jugadores y aparece en esta escena y en las siguientes de la rama.">＋ Defensor</button>
+        <button id="defLine" title="Agrega varios defensores en línea">🛡 Línea defensiva…</button>
+        <button id="defDel" title="Quita los defensores elegidos; si no hay ninguno elegido, quita toda la defensa de esta escena y las siguientes">− Quitar defensor</button>
       </div>
       <div class="fieldwrap"><svg id="field" viewBox="-5 28 78 35" preserveAspectRatio="xMidYMid meet"></svg></div>
       <div class="pop" id="pop">
@@ -600,6 +603,10 @@ const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const ease=k=>k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2;
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const PLAYERS=Array.from({length:15},(_,i)=>({id:String(i+1),fwd:i<8}));
+const DEFCOL='#e7555f';
+const defIds=sc=>Object.keys((sc&&sc.players)||{}).filter(k=>k[0]==='D');
+const PL=sc=>PLAYERS.concat(defIds(sc||steps[cur]).map(id=>({id,fwd:false,def:true,label:id.slice(1)})));
+const dotFill=p=>p.def?DEFCOL:(p.fwd?'#2f55c9':'#4fd1e5');
 const BALL_OFF=[1.05,-.6];
 const PALETTE=['#f7ae59','#cda2eb','#88b9f2','#e7555f','#34d399','#facc15'];
 const KINDS={
@@ -885,15 +892,22 @@ function drawField(){
   <g id="gTrails"></g><g id="gMarks"></g><g id="gAlt"></g><g id="gKeys"></g><g id="gPlayers"></g>
   <g id="gBall" class="ball" data-kind="ball"><ellipse rx=".75" ry=".48" fill="#b45309" stroke="#fff" stroke-width=".13" transform="rotate(-30)"/><path d="M-.35 .05L.35 -.05" stroke="#fff" stroke-width=".1" transform="rotate(-30)"/></g><g id="gHandles"></g><g id="gTip"></g><g id="gSel" style="pointer-events:none"><rect id="marqRect" fill="rgba(79,209,229,.15)" stroke="#4fd1e5" stroke-width=".2" stroke-dasharray=".6 .4" style="display:none"/></g>`;
   const gp=$('#gPlayers');
-  for(const p of PLAYERS){
-    const g=document.createElementNS(NS,'g');
-    g.setAttribute('class','pl'); g.dataset.kind='pl'; g.dataset.id=p.id;
-    g.innerHTML=`<circle class="selring" r="1.9" fill="none" stroke="#4fd1e5" stroke-width=".28" stroke-dasharray=".5 .3" style="display:none"/>
-      <circle class="ring" r="1.7" fill="none" stroke="#fde047" stroke-width=".3" style="display:none"/>
-      <circle r="1.05" fill="${p.fwd?'#1e3a8a':'#4fd1e5'}" stroke="#fff" stroke-width=".15"/>
-      <text fill="${p.fwd?'#fff':'#072029'}">${p.id}</text>`;
-    gp.appendChild(g);
-  }
+  for(const p of PLAYERS) mkPlayerEl(p,gp);
+}
+
+function mkPlayerEl(p,gp){
+  const g=document.createElementNS(NS,'g');
+  g.setAttribute('class','pl'+(p.def?' def':'')); g.dataset.kind='pl'; g.dataset.id=p.id;
+  g.innerHTML=`<circle class="selring" r="1.9" fill="none" stroke="#4fd1e5" stroke-width=".28" stroke-dasharray=".5 .3" style="display:none"/>
+    <circle class="ring" r="1.7" fill="none" stroke="#fde047" stroke-width=".3" style="display:none"/>
+    <circle r="1.05" fill="${p.def?DEFCOL:(p.fwd?'#1e3a8a':'#4fd1e5')}" stroke="#fff" stroke-width=".15"/>
+    <text fill="${p.def||p.fwd?'#fff':'#072029'}">${p.def?p.label:p.id}</text>`;
+  gp.appendChild(g); return g;
+}
+function syncDefs(){
+  const gp=$('#gPlayers'), want=defIds(steps[cur]);
+  gp.querySelectorAll('.pl.def').forEach(g=>{ if(!want.includes(g.dataset.id)) g.remove() });
+  want.forEach(id=>{ if(!gp.querySelector('.pl[data-id="'+id+'"]')) mkPlayerEl({id,def:true,label:id.slice(1)},gp) });
 }
 
 /* ---------- lectura de pasos ---------- */
@@ -947,7 +961,7 @@ function setT(node,x,y){node.setAttribute('transform',`translate(${x} ${y})`)}
 function draw(){
   const s=steps[cur];
   document.querySelectorAll('#gPlayers .pl').forEach(g=>{
-    const p=disp.p[g.dataset.id]; setT(g,p[0],p[1]);
+    const p=disp.p[g.dataset.id]; if(!p) return; setT(g,p[0],p[1]);
     g.querySelector('.ring').style.display=s.highlight.includes(g.dataset.id)?'':'none';
     g.querySelector('.selring').style.display=(mode==='edit'&&sel.has(g.dataset.id))?'':'none';
     g.querySelectorAll('.optring').forEach(n=>n.remove());
@@ -1047,11 +1061,13 @@ function evalTrack(tk,t){
 let entryStart=null, entryIdx=-1;
 const sceneD=i=>(entryStart&&i===entryIdx&&isRoot(i))?1.6:dur(i);
 function buildRig(i){
-  const s=steps[i], D=sceneD(i), pi=parentIdx(i), en=stepDisp(s), sv=(entryStart&&i===entryIdx&&isRoot(i))?{p:entryStart.p,ball:entryStart.ball}:startOf(i), st={p:sv.p};
+  const s=steps[i], D=sceneD(i), pi=parentIdx(i), en=stepDisp(s), sv=(entryStart&&i===entryIdx&&isRoot(i))?{p:entryStart.p,ball:entryStart.ball}:startOf(i), st={p:Object.assign({},sv.p)};
+  for(const id in en.p) if(!st.p[id]) st.p[id]=en.p[id].slice();
   const eq=data.eqSpeed!==false, tr={}, plain={}; let Lmax=0;
   const keysOf=id=>((s.tracks&&s.tracks[id])||[]).filter(k=>k[0]>.01&&k[0]<D-.01);
-  for(const p of PLAYERS){ if(!keysOf(p.id).length){const L=hyp(st.p[p.id],en.p[p.id]); plain[p.id]=L; Lmax=Math.max(Lmax,L)} }
-  for(const p of PLAYERS){
+  const PLs=PL(s);
+  for(const p of PLs){ if(!keysOf(p.id).length){const L=hyp(st.p[p.id],en.p[p.id]); plain[p.id]=L; Lmax=Math.max(Lmax,L)} }
+  for(const p of PLs){
     const id=p.id, a=st.p[id], b=en.p[id], keys=keysOf(id); let pts;
     if(keys.length) pts=[[0,a[0],a[1]],...keys.map(k=>[k[0],k[1],k[2]]),[D,b[0],b[1]]];
     else{
@@ -1101,7 +1117,7 @@ function drawTrails(){
   if(isRoot(cur)||typeOf(cur)==='decision') return;
   const pi=parentIdx(cur);
   const s=steps[cur], rig=buildRig(cur), oc=pi===null?null:optColorTo(pi,cur), col=oc||'#ffffff', mk=ensureMarker(col);
-  for(const p of PLAYERS){
+  for(const p of PL(s)){
     const id=p.id, keys=(s.tracks&&s.tracks[id])||[], a=rig.st.p[id], b=rig.en.p[id];
     if(!keys.length&&hyp(a,b)<=.6) continue;
     const poly=[]; for(let k=0;k<=36;k++) poly.push(evalTrack(rig.tr[id],rig.D*k/36));
@@ -1211,7 +1227,7 @@ const FRAMES={full:null,left:{x:-5,y:28,w:40},right:{x:33,y:28,w:40}};
 function frameOf(sc){const z=sc&&sc.zoom; if(!z||!(z.w<77)) return VB; const w=clamp(+z.w||78,16,78), h=w*VB.h/VB.w; return {x:clamp(+z.x||0,VB.x,VB.x+VB.w-w),y:clamp(+z.y||0,VB.y,VB.y+VB.h-h),w,h}}
 function applyFrame(){const f=frameOf(steps[cur]); $('#field').setAttribute('viewBox',f.x+' '+f.y+' '+f.w+' '+f.h)}
 function drawStatic(){
-  applyFrame();
+  applyFrame(); syncDefs();
   playT=clamp(playT,0,dur(cur));
   disp=stateAt(buildRig(cur),playT);
   draw(); drawMarks(); drawTrails(); updateUI(); updatePop(); renderKeys(); updTimeline();
@@ -1273,7 +1289,7 @@ function thumb(s){
   s.marks.filter(m=>m.type==='ruck').forEach(m=>{h+=`<ellipse cx="${m.x}" cy="${m.y}" rx="3.4" ry="2.2" fill="rgba(255,255,255,.16)" stroke="#fff" stroke-width=".3" stroke-dasharray="1 .7"/>`});
   const d=stepDisp(s);
   s.options.forEach(o=>{(o.receivers||[]).forEach(id=>{const q=d.p[id]; if(q) h+=`<circle cx="${q[0]}" cy="${q[1]}" r="3" fill="none" stroke="${o.color}" stroke-width=".9"/>`})});
-  PLAYERS.forEach(p=>{const q=d.p[p.id]; h+=`<circle cx="${q[0]}" cy="${q[1]}" r="1.85" fill="${p.fwd?'#2f55c9':'#4fd1e5'}" stroke="#fff" stroke-width=".35"/>`});
+  PL(s).forEach(p=>{const q=d.p[p.id]; if(q) h+=`<circle cx="${q[0]}" cy="${q[1]}" r="1.85" fill="${dotFill(p)}" stroke="#fff" stroke-width=".35"/>`});
   h+=`<ellipse cx="${d.b[0]}" cy="${d.b[1]}" rx="1.2" ry=".8" fill="#f59e0b" stroke="#fff" stroke-width=".25" transform="rotate(-30 ${d.b[0]} ${d.b[1]})"/>`;
   sv.innerHTML=h; return sv;
 }
@@ -2061,7 +2077,7 @@ svg.addEventListener('pointermove',e=>{
     marq.x1=x; marq.y1=y;
     const x0=Math.min(marq.x0,x),x1=Math.max(marq.x0,x),y0=Math.min(marq.y0,y),y1=Math.max(marq.y0,y);
     sel.clear(); marq.base.forEach(k=>sel.add(k));
-    for(const p of PLAYERS){const q=disp.p[p.id]; if(q[0]>=x0&&q[0]<=x1&&q[1]>=y0&&q[1]<=y1) sel.add(p.id)}
+    for(const p of PL(steps[cur])){const q=disp.p[p.id]; if(q&&q[0]>=x0&&q[0]<=x1&&q[1]>=y0&&q[1]<=y1) sel.add(p.id)}
     drawMarq(); refreshSel(); return;
   }
   if(!drag) return;
@@ -2275,8 +2291,39 @@ $('#tlDur').onchange=e=>{
   Object.values(s.tracks).forEach(a=>a.forEach(k=>{k[0]=r2(k[0]*f)})); (s.bkeys||[]).forEach(k=>{k.t=r2(k.t*f)});
   s.duration=nv; playT=playT*f; save(); drawStatic();
 };
+/* ---------- defensores ---------- */
+const branchScenes=()=>{const r=subtreeIds(cur), arr=steps.filter(t=>r.has(t.id)); if(!arr.includes(steps[cur])) arr.push(steps[cur]); return arr};
+function nextDefId(){const used=new Set(); branchScenes().forEach(t=>defIds(t).forEach(id=>used.add(id))); let n=1; while(used.has('D'+n)) n++; return 'D'+n}
+function addDefenders(list){
+  const sc=branchScenes();
+  list.forEach(([id,x,y])=>sc.forEach(t=>{
+    const q=[cx(x),cy(y)]; if(!t.players[id]) t.players[id]=q.slice();
+    if(t.start&&t.start.p&&!t.start.p[id]) t.start.p[id]=q.slice();
+  }));
+  save(); sideCur=-1; drawStatic();
+}
+$('#defAdd').onclick=()=>{
+  const id=nextDefId(), s0=steps[cur], ref=stepDisp(s0), ys=PLAYERS.map(p=>ref.p[p.id][1]), n=defIds(s0).length;
+  addDefenders([[id,clamp(ref.b[0]+3+(n%6)*2.6,0,70),clamp(Math.min(...ys)-3-Math.floor(n/6)*2.5,29,62)]]);
+  sel.clear(); sel.add(id); refreshSel&&refreshSel(); draw();
+};
+$('#defLine').onclick=()=>{
+  const v=prompt('¿Cuántos defensores en línea? (1 a 15)','8'); if(v===null) return; const k=clamp(Math.round(+v)||0,1,15); if(!k) return;
+  const s0=steps[cur], ref=stepDisp(s0), ys=PLAYERS.map(p=>ref.p[p.id][1]), y=clamp(Math.min(...ys)-3,29,62), sp=3.4, w=(k-1)*sp, x0=clamp(ref.b[0]-w/2,2,68-w);
+  const list=[]; let n0=0; const used=new Set(); branchScenes().forEach(t=>defIds(t).forEach(id=>used.add(id)));
+  for(let i=0;i<k;i++){ while(used.has('D'+(++n0))); used.add('D'+n0); list.push(['D'+n0,x0+i*sp,y]) }
+  addDefenders(list);
+};
+$('#defDel').onclick=()=>{
+  const chosen=[...sel].filter(id=>id[0]==='D'), all=defIds(steps[cur]);
+  if(!all.length) return toast('Esta escena no tiene defensores.');
+  let ids=chosen;
+  if(!ids.length){ if(!confirm('¿Quitar TODA la defensa de esta escena y de las siguientes de la rama?')) return; ids=all }
+  branchScenes().forEach(t=>ids.forEach(id=>{ delete t.players[id]; if(t.start&&t.start.p) delete t.start.p[id]; if(t.tracks) delete t.tracks[id]; if(t.delays) delete t.delays[id]; if(t.speeds) delete t.speeds[id]; if(t.paths) delete t.paths[id]; t.highlight=(t.highlight||[]).filter(x=>x!==id) }));
+  ids.forEach(id=>sel.delete(id)); save(); sideCur=-1; drawStatic();
+};
 let frameClip=null;
-const targetIds=()=>sel.size?[...sel]:PLAYERS.map(p=>p.id);
+const targetIds=()=>sel.size?[...sel]:PL(steps[cur]).map(p=>p.id);
 const interior=()=>playT>.05&&playT<dur(cur)-.05;
 function kmsg(t){const k=$('#kInfo'); k.textContent=t; setTimeout(()=>updTimeline(),2600)}
 $('#kSet').onclick=()=>{
@@ -2675,9 +2722,9 @@ function bigPrev(i){
   (s.marks||[]).forEach(m=>{ if(m.type==='text') h+=`<text x="${m.x}" y="${m.y+1.5}" font-size="1.5" fill="${m.color||'#f1f5f9'}" font-weight="700">${String(m.text||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').split('\n')[0]}</text>`; else if(m.type==='ruck') h+=`<ellipse cx="${m.x}" cy="${m.y}" rx="3.4" ry="2.2" fill="rgba(255,255,255,.16)" stroke="#fff" stroke-width=".3" stroke-dasharray="1 .7"/>` });
   (s.marks||[]).filter(m=>m.type==='alt').forEach(m=>{const P=en.p[m.pl]; if(!P) return; m.routes.forEach(r=>{const q=r.pts[r.pts.length-1]; if(q) h+=`<line x1="${P[0]}" y1="${P[1]}" x2="${q[0]}" y2="${q[1]}" stroke="${r.color}" stroke-width=".6" stroke-opacity=".75" stroke-dasharray="1 .6"/>`})});
   const moving=hasMotion(i);
-  if(moving) PLAYERS.forEach(p=>{const a=sv.p[p.id], b=en.p[p.id]; if(a&&hyp(a,b)>.6) h+=`<line x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}" stroke="#fff" stroke-opacity=".7" stroke-width=".28" stroke-dasharray=".8 .6"/><circle cx="${a[0]}" cy="${a[1]}" r="1.1" fill="none" stroke="#fff" stroke-opacity=".5" stroke-width=".2" stroke-dasharray=".4 .3"/>`});
+  if(moving) PL(s).forEach(p=>{const a=sv.p[p.id], b=en.p[p.id]; if(a&&b&&hyp(a,b)>.6) h+=`<line x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}" stroke="#fff" stroke-opacity=".7" stroke-width=".28" stroke-dasharray=".8 .6"/><circle cx="${a[0]}" cy="${a[1]}" r="1.1" fill="none" stroke="#fff" stroke-opacity=".5" stroke-width=".2" stroke-dasharray=".4 .3"/>`});
   s.options.forEach(o=>{(o.receivers||[]).forEach(id=>{const q=en.p[id]; if(q) h+=`<circle cx="${q[0]}" cy="${q[1]}" r="2.2" fill="none" stroke="${o.color}" stroke-width=".55"/>`})});
-  PLAYERS.forEach(p=>{const q=en.p[p.id]; h+=`<circle cx="${q[0]}" cy="${q[1]}" r="1.45" fill="${p.fwd?'#2f55c9':'#4fd1e5'}" stroke="#fff" stroke-width=".25"/><text x="${q[0]}" y="${q[1]+.55}" font-size="1.6" font-weight="800" text-anchor="middle" fill="${p.fwd?'#fff':'#072029'}">${p.id}</text>`});
+  PL(s).forEach(p=>{const q=en.p[p.id]; if(!q) return; h+=`<circle cx="${q[0]}" cy="${q[1]}" r="1.45" fill="${dotFill(p)}" stroke="#fff" stroke-width=".25"/><text x="${q[0]}" y="${q[1]+.55}" font-size="1.6" font-weight="800" text-anchor="middle" fill="${p.def||p.fwd?'#fff':'#072029'}">${p.def?p.label:p.id}</text>`});
   h+=`<ellipse cx="${en.b[0]}" cy="${en.b[1]}" rx="1.1" ry=".7" fill="#f59e0b" stroke="#fff" stroke-width=".2" transform="rotate(-30 ${en.b[0]} ${en.b[1]})"/>`;
   sk.innerHTML=h; box.appendChild(sk);
   const t=document.createElement('div'); t.className='pt'; t.textContent=s.title||'(sin título)'; box.appendChild(t);
