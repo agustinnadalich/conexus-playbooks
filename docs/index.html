@@ -677,7 +677,7 @@ const DEFCOL='#e7555f';
 const defIds=sc=>Object.keys((sc&&sc.players)||{}).filter(k=>k[0]==='D');
 const PL=sc=>PLAYERS.concat(defIds(sc||steps[cur]).map(id=>({id,fwd:false,def:true,label:id.slice(1)})));
 const dotFill=p=>p.def?DEFCOL:(p.fwd?'#2f55c9':'#4fd1e5');
-const BALL_OFF=[1.05,-.6];
+const BALL_OFF=[.45,-.4];
 const PALETTE=['#f7ae59','#cda2eb','#88b9f2','#e7555f','#34d399','#facc15'];
 const KINDS={
   lineout:{n:'Lineout',g:'⇈',c:'#f7ae59'}, scrum:{n:'Scrum',g:'⬢',c:'#cda2eb'},
@@ -970,6 +970,7 @@ function mkPlayerEl(p,gp){
   g.setAttribute('class','pl'+(p.def?' def':'')); g.dataset.kind='pl'; g.dataset.id=p.id;
   g.innerHTML=`<circle class="selring" r="1.9" fill="none" stroke="#4fd1e5" stroke-width=".28" stroke-dasharray=".5 .3" style="display:none"/>
     <circle class="ring" r="1.7" fill="none" stroke="#fde047" stroke-width=".3" style="display:none"/>
+    <circle class="carry" r="1.5" fill="none" stroke="#f59e0b" stroke-width=".4" style="display:none"/>
     <circle r="1.05" fill="${p.def?DEFCOL:(p.fwd?'#1e3a8a':'#4fd1e5')}" stroke="#fff" stroke-width=".15"/>
     <text fill="${p.def||p.fwd?'#fff':'#072029'}">${p.def?p.label:p.id}</text>`;
   gp.appendChild(g); return g;
@@ -1033,6 +1034,7 @@ function draw(){
   document.querySelectorAll('#gPlayers .pl').forEach(g=>{
     const p=disp.p[g.dataset.id]; if(!p) return; setT(g,p[0],p[1]);
     g.querySelector('.ring').style.display=s.highlight.includes(g.dataset.id)?'':'none';
+    g.querySelector('.carry').style.display=(disp.h&&disp.h===g.dataset.id)?'':'none';
     g.querySelector('.selring').style.display=(mode==='edit'&&sel.has(g.dataset.id))?'':'none';
     g.querySelectorAll('.optring').forEach(n=>n.remove());
     let n=0;
@@ -1168,7 +1170,7 @@ function ballRepAt(rig,t){
   if(A.holder&&A.holder===B.holder) return {holder:A.holder};
   const b=ballAt(rig,t); return {holder:null,x:r1(b[0]),y:r1(b[1])};
 }
-function stateAt(rig,t){const p={}; for(const id in rig.tr) p[id]=evalTrack(rig.tr[id],t); return {p,b:ballAt(rig,t)}}
+function stateAt(rig,t){const p={}; for(const id in rig.tr) p[id]=evalTrack(rig.tr[id],t); const [A,B]=ballSeg(rig,t), h=(A.holder&&A.holder===B.holder)?A.holder:(t>=B.t-1e-6&&B.holder)?B.holder:(t<=A.t+1e-6&&A.holder)?A.holder:null; return {p,b:ballAt(rig,t),h}}
 function setKey(s,id,t,x,y){
   const D=dur(steps.indexOf(s)); t=clamp(t,.05,D-.05);
   const arr=s.tracks[id]=s.tracks[id]||[], j=arr.findIndex(k=>Math.abs(k[0]-t)<.04);
