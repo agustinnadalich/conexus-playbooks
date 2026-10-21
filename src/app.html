@@ -1092,7 +1092,6 @@ function ballAt(rig,t){
   if(A.holder&&A.holder===B.holder) return ballPosOf(rig,A,t);
   const u=clamp((t-A.t)/Math.max(1e-6,B.t-A.t),0,1), pa=ballPosOf(rig,A,A.t), pb=ballPosOf(rig,B,B.t);
   const b=[pa[0]+(pb[0]-pa[0])*u, pa[1]+(pb[1]-pa[1])*u];
-  if((A.holder||B.holder)&&A.holder!==B.holder) b[1]-=Math.sin(Math.PI*u)*1.4;
   return b;
 }
 function ballRepAt(rig,t){
