@@ -235,8 +235,8 @@ begin
   if coalesce(array_length(ad, 1), 0) > 0 then res := res || ('creó: ' || _lim(ad)); end if;
   if coalesce(array_length(ch, 1), 0) > 0 then res := res || ('modificó: ' || _lim(ch)); end if;
   if coalesce(array_length(rm, 1), 0) > 0 then res := res || ('eliminó: ' || _lim(rm)); end if;
-  if (o -> 'starts') is distinct from (n -> 'starts') then res := res || 'cambió los inicios'; end if;
-  if (o -> 'layoutOff') is distinct from (n -> 'layoutOff') then res := res || 'movió cajas del mapa'; end if;
+  if (o -> 'starts') is distinct from (n -> 'starts') then res := res || 'cambió los inicios'::text; end if;
+  if (o -> 'layoutOff') is distinct from (n -> 'layoutOff') then res := res || 'movió cajas del mapa'::text; end if;
   return array_to_string(res, ' · ');
 end $$;
 
