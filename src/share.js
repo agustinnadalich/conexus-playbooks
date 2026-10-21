@@ -24,6 +24,7 @@ function subsetFor(roots,opts){
   const lo={}; if(data.layoutOff) Object.keys(data.layoutOff).forEach(d=>{lo[d]={}; Object.keys(data.layoutOff[d]).forEach(k=>{ if(keep.has(k)||starts.some(st=>'start:'+st.id===k)) lo[d][k]=data.layoutOff[d][k] })});
   return {version:3,title:data.title||'',starts,steps:out,mapDir:data.mapDir,layoutOff:lo,__roots:roots,__opts:opts||{}};
 }
+const getShare=async t=>{try{return await rpc('cx_share_get',{p_token:t,p_log:false})}catch(e){return await rpc('cx_share_get',{p_token:t})}};
 const urlFor=t=>location.origin+location.pathname.replace(/index\.html$/,'')+'?s='+t+(CX.lang==='it'?'&lang=it':'');
 const who=()=>localStorage.getItem('cx.who')||'editor';
 function esc(t){return String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
@@ -40,14 +41,14 @@ async function open(){
     box.innerHTML=''; list.forEach(it=>{
       const row=document.createElement('div'); row.style.cssText='border:1px solid #323c52;border-radius:10px;padding:8px 10px;margin:6px 0';
       row.innerHTML='<div><b>'+esc(it.name)+'</b> <span class="hint">· '+T('actualizado','aggiornato')+' '+new Date(it.updated_at).toLocaleString(CX.lang==='it'?'it-IT':'es-AR')+'</span></div><div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap"><input readonly value="'+urlFor(it.token)+'" style="flex:1;min-width:220px"><button class="cp">'+T('Copiar','Copia')+'</button><button class="up">'+T('Actualizar','Aggiorna')+'</button><button class="op">'+T('Abrir','Apri')+'</button><button class="dl">'+T('Eliminar','Elimina')+'</button></div><label class="hint" style="display:flex;gap:6px;align-items:center;margin-top:6px"><input type="checkbox" class="hs"> '+T('Ocultar la lista «Pasos de la jugada»','Nascondi l\'elenco «Passi dello schema»')+'</label>';
-      rpc('cx_share_get',{p_token:it.token}).then(g=>{ if(g.ok) row.querySelector('.hs').checked=!!(g.data.__opts&&g.data.__opts.hideSteps) }).catch(()=>{});
-      row.querySelector('.hs').onchange=async e=>{ const g=await rpc('cx_share_get',{p_token:it.token}); if(!g.ok) return; g.data.__opts=Object.assign({},g.data.__opts,{hideSteps:e.target.checked}); const r=await rpc('cx_share_update',{p_hash:CX.hash,p_token:it.token,p_data:g.data}); toast(r.ok?T('Listo: el link ya refleja el cambio.','Fatto: il link riflette già la modifica.'):'Error') };
+      getShare(it.token).then(g=>{ if(g.ok) row.querySelector('.hs').checked=!!(g.data.__opts&&g.data.__opts.hideSteps) }).catch(()=>{});
+      row.querySelector('.hs').onchange=async e=>{ const g=await getShare(it.token); if(!g.ok) return; g.data.__opts=Object.assign({},g.data.__opts,{hideSteps:e.target.checked}); const r=await rpc('cx_share_update',{p_hash:CX.hash,p_token:it.token,p_data:g.data}); toast(r.ok?T('Listo: el link ya refleja el cambio.','Fatto: il link riflette già la modifica.'):'Error') };
       const inp=row.querySelector('input'); inp.onclick=()=>inp.select();
       row.querySelector('.cp').onclick=async()=>{try{await navigator.clipboard.writeText(inp.value); toast(T('Link copiado.','Link copiato.'))}catch(e){inp.select(); document.execCommand('copy'); toast(T('Link copiado.','Link copiato.'))}};
       row.querySelector('.op').onclick=()=>window.open(inp.value,'_blank','noopener');
       row.querySelector('.up').onclick=async()=>{
         const roots=(it.roots||[]).filter(r=>idxOf(r)>=0); if(!roots.length) return toast(T('Las jugadas de este link ya no existen.','Gli schemi di questo link non esistono più.'));
-        const cur=await rpc('cx_share_get',{p_token:it.token}); const r=await rpc('cx_share_update',{p_hash:CX.hash,p_token:it.token,p_data:subsetFor(roots,(cur.data&&cur.data.__opts)||{})}); toast(r.ok?T('Link actualizado con los cambios actuales.','Link aggiornato con le modifiche attuali.'):'Error'); refresh()};
+        const cur=await getShare(it.token); const r=await rpc('cx_share_update',{p_hash:CX.hash,p_token:it.token,p_data:subsetFor(roots,(cur.data&&cur.data.__opts)||{})}); toast(r.ok?T('Link actualizado con los cambios actuales.','Link aggiornato con le modifiche attuali.'):'Error'); refresh()};
       row.querySelector('.dl').onclick=async()=>{ if(!confirm(T('¿Eliminar este link? Quien lo tenga ya no podrá abrirlo.','Eliminare questo link? Chi lo ha non potrà più aprirlo.'))) return; await rpc('cx_share_delete',{p_hash:CX.hash,p_token:it.token}); refresh()};
       box.appendChild(row)});
   }

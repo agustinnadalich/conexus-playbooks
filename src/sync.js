@@ -92,6 +92,7 @@ async function poll(){
   }catch(e){setStatus('off')}
 }
 setInterval(poll,8000);
+try{ if(!sessionStorage.getItem('cx.logged')){ sessionStorage.setItem('cx.logged','1'); rpc('cx_log',{p_hash:CX.hash,p_who:who,p_action:'login',p_detail:(CX.lang==='it'?'IT':'ES')+' · '+(innerWidth<760?'móvil':'escritorio')}).catch(function(){}) } }catch(e){}
 /* ---- quién está en qué escena ---- */
 async function presence(){
   if(!editor) return;

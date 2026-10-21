@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Conexus · Actividad</title>
+<style>
+:root{--bg:#181E2F;--card:#1D2435;--bd:#323C52;--tx:#F1F5F9;--tx2:#B3BDCC;--pri:#4FD1E5}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.5 Montserrat,Inter,system-ui,sans-serif}
+.wrap{max-width:1200px;margin:0 auto;padding:16px}
+h1{font-size:20px;margin:0 0 4px}
+.mut{color:var(--tx2)}
+input,select,button{font:inherit;color:var(--tx);background:#131827;border:1px solid var(--bd);border-radius:10px;padding:7px 10px}
+button{background:#232c42;cursor:pointer}button.pri{background:var(--pri);color:#072029;border-color:var(--pri);font-weight:700}
+.login{max-width:360px;margin:12vh auto;background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:24px;display:grid;gap:12px;text-align:center}
+.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:12px 0}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin:12px 0}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:10px 12px}
+.card b{display:block}
+table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--bd);border-radius:12px;overflow:hidden}
+th,td{padding:7px 10px;border-bottom:1px solid var(--bd);text-align:left;vertical-align:top}
+th{background:#232c42;font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2)}
+td.d{max-width:480px;word-break:break-word}
+.tag{display:inline-block;padding:1px 8px;border-radius:999px;font-size:12px;border:1px solid var(--bd)}
+.t-save{border-color:#34d399;color:#34d399}.t-login{border-color:#88b9f2;color:#88b9f2}.t-share_view{border-color:#cda2eb;color:#cda2eb}.t-share_create,.t-share_update{border-color:#f7ae59;color:#f7ae59}.t-share_delete{border-color:#e7555f;color:#e7555f}
+.scroll{overflow:auto}
+@media(max-width:700px){td.d{max-width:220px}}
+</style>
+</head>
+<body>
+<div id="login" class="login">
+  <h1>Actividad</h1>
+  <div class="mut">Clave de administración</div>
+  <input id="pw" type="password" autocomplete="current-password">
+  <button class="pri" id="go">Entrar</button>
+  <div id="err" style="color:#e7555f;min-height:18px"></div>
+</div>
+<div id="app" class="wrap" style="display:none">
+  <h1>Conexus · Actividad</h1>
+  <div class="mut">Quién entró y qué hizo cada persona. Los nombres los escribe cada editor al ingresar (no hay cuentas individuales todavía).</div>
+  <div class="cards" id="sum"></div>
+  <div class="bar">
+    <select id="fws"><option value="">Todos los espacios</option></select>
+    <select id="fact"><option value="">Todas las acciones</option><option value="login">Entradas</option><option value="save">Cambios en el plan</option><option value="share_create">Links creados</option><option value="share_update">Links actualizados</option><option value="share_delete">Links eliminados</option><option value="share_view">Visitas a links</option></select>
+    <input id="fwho" placeholder="Buscar persona o texto…">
+    <button id="ref">↻ Actualizar</button>
+    <span class="mut" id="cnt"></span>
+  </div>
+  <div class="scroll"><table><thead><tr><th>Cuándo</th><th>Espacio</th><th>Quién</th><th>Acción</th><th>Detalle</th><th>Dispositivo</th></tr></thead><tbody id="tb"></tbody></table></div>
+</div>
+<script>
+(function(){
+var URL='https://pvsmiqxzhrguyunneafb.supabase.co', KEY='sb_publishable_FIokvH4jMxZ9jZb6MoF9rQ_yeree1_0';
+var $=function(s){return document.querySelector(s)}, H=null, ROWS=[];
+var WS={sanluis:'San Luis',pescara:'Pescara',tucuman:'Tucumán'};
+var ACT={login:'Entró',save:'Cambió el plan',share_create:'Creó link',share_update:'Actualizó link',share_delete:'Eliminó link',share_view:'Abrió link'};
+function sha(str){var b=new TextEncoder().encode(str);return crypto.subtle.digest('SHA-256',b).then(function(d){return Array.prototype.map.call(new Uint8Array(d),function(x){return('0'+x.toString(16)).slice(-2)}).join('')})}
+function rpc(fn,body){return fetch(URL+'/rest/v1/rpc/'+fn,{method:'POST',headers:{apikey:KEY,'Content-Type':'application/json'},body:JSON.stringify(body)}).then(function(r){return r.json()})}
+function esc(t){return String(t==null?'':t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function dev(ua){if(!ua)return '';var m=/Mobile|Android|iPhone|iPad/.test(ua)?'📱':'💻', b=/Edg\//.test(ua)?'Edge':/OPR\//.test(ua)?'Opera':/Chrome\//.test(ua)?'Chrome':/Firefox\//.test(ua)?'Firefox':/Safari\//.test(ua)?'Safari':'?', o=/Windows/.test(ua)?'Windows':/Android/.test(ua)?'Android':/iPhone|iPad/.test(ua)?'iOS':/Mac OS/.test(ua)?'Mac':/Linux/.test(ua)?'Linux':''; return m+' '+b+(o?' · '+o:'')}
+function load(){
+  return rpc('cx_activity',{p_hash:H,p_limit:1500}).then(function(r){
+    if(!r.ok){ sessionStorage.removeItem('cx.adm'); $('#err').textContent='Clave incorrecta.'; $('#login').style.display='grid'; $('#app').style.display='none'; return }
+    ROWS=r.rows; $('#login').style.display='none'; $('#app').style.display='block'; fill(); draw();
+  }).catch(function(){ $('#err').textContent='Sin conexión.' });
+}
+function fill(){var s=$('#fws'), cur=s.value; var set={}; ROWS.forEach(function(r){if(r.ws) set[r.ws]=1}); s.innerHTML='<option value="">Todos los espacios</option>'+Object.keys(set).map(function(k){return '<option value="'+k+'">'+esc(WS[k]||k)+'</option>'}).join(''); s.value=cur}
+function draw(){
+  var fw=$('#fws').value, fa=$('#fact').value, q=$('#fwho').value.toLowerCase();
+  var rows=ROWS.filter(function(r){return (!fw||r.ws===fw)&&(!fa||r.action===fa)&&(!q||((r.who||'')+' '+(r.detail||'')).toLowerCase().indexOf(q)>=0)});
+  $('#cnt').textContent=rows.length+' de '+ROWS.length+' eventos';
+  $('#tb').innerHTML=rows.map(function(r){var d=new Date(r.at);
+    return '<tr><td>'+esc(d.toLocaleString('es-AR'))+'</td><td>'+esc(WS[r.ws]||r.ws||'')+'</td><td>'+esc(r.who||'—')+' <span class="mut">('+esc(r.role||'')+')</span></td><td><span class="tag t-'+esc(r.action)+'">'+esc(ACT[r.action]||r.action)+'</span></td><td class="d">'+esc(r.detail||'')+'</td><td class="mut">'+esc(dev(r.ua))+'</td></tr>'}).join('')||'<tr><td colspan="6" class="mut">Sin eventos.</td></tr>';
+  // resumen por persona (editores)
+  var by={}; ROWS.forEach(function(r){ if(r.role!=='editor'||!r.who) return; var k=(r.ws||'')+'|'+r.who; var o=by[k]=by[k]||{ws:r.ws,who:r.who,last:r.at,n:0,saves:0}; o.n++; if(r.action==='save') o.saves++; if(r.at>o.last) o.last=r.at });
+  var views=ROWS.filter(function(r){return r.action==='share_view'}).length, logins=ROWS.filter(function(r){return r.action==='login'&&r.role!=='editor'}).length;
+  var h=Object.keys(by).map(function(k){return by[k]}).sort(function(a,b){return a.last<b.last?1:-1}).map(function(o){return '<div class="card"><b>'+esc(o.who)+' <span class="mut">· '+esc(WS[o.ws]||o.ws)+'</span></b>Último: '+esc(new Date(o.last).toLocaleString('es-AR'))+'<br>'+o.saves+' guardados · '+o.n+' eventos</div>'}).join('');
+  $('#sum').innerHTML=h+'<div class="card"><b>Jugadores / lectura</b>'+logins+' entradas con clave de lectura<br>'+views+' visitas a links compartidos</div>';
+}
+$('#go').onclick=function(){var p=$('#pw').value.toLowerCase().replace(/\s+/g,''); sha('conexus-play|'+p).then(function(h){H=h; sessionStorage.setItem('cx.adm',h); load()})};
+$('#pw').onkeydown=function(e){if(e.key==='Enter') $('#go').click()};
+['#fws','#fact'].forEach(function(s){$(s).onchange=draw}); $('#fwho').oninput=draw; $('#ref').onclick=load;
+var saved=sessionStorage.getItem('cx.adm'); if(saved){H=saved; load()}
+setInterval(function(){ if(H&&$('#app').style.display!=='none') load() },30000);
+})();
+</script>
+</body>
+</html>
